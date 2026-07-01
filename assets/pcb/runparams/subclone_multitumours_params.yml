@@ -1,0 +1,15 @@
+#Run from ${projectDir}
+input: 'assets/pcb/samplesheets/multi_tumours_wes_samplesheet.csv'
+outdir: '/scratch/pawsey1152/snguyen/subclonal/multi_tumours/sarek_multi_wes_bait'
+genome: 'GATK.GRCh38'
+intervals: 'assets/pcb/SureSelect_Human_All_Exon_HS_V8_hg38_Covered_Padded.bed'
+#intervals: 'assets/pcb/SureSelect_Human_All_Exon_HS_V8_hg38_Regions_Padded.bed'
+tools: 'freebayes,mpileup,mutect2,strelka,lofreq,cnvkit,manta,merge,snpsift'
+wes: true
+filter_vcfs: true
+normalize_vcfs: true
+snv_consensus_calling: true
+vep_dbnsfp: true
+dbnsfp: '/scratch/pawsey1152/snguyen/databases/dbNSFP/dbNSFP5.3.1a_grch38.gz'
+dbnsfp_tbi: '/scratch/pawsey1152/snguyen/databases/dbNSFP/dbNSFP5.3.1a_grch38.gz.tbi'
+snpsift_databases: 'assets/pcb/snpsift_databases.csv'
