@@ -1,5 +1,0 @@
-vcf,tbi,fields,prefix,vardb
-/scratch/references/sarek/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/dbsnp_146.hg38.vcf.gz,/scratch/references/sarek/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/dbsnp_146.hg38.vcf.gz.tbi,RS;COMMON,dbSNP_,
-/scratch/references/sarek/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/af-only-gnomad.hg38.vcf.gz,/scratch/references/sarek/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/af-only-gnomad.hg38.vcf.gz.tbi,AF;AC;AN,gnomAD_,
-/scratch/pawsey1152/snguyen/databases/clinVar/clinvar.vcf.gz,/scratch/pawsey1152/snguyen/databases/clinVar/clinvar.vcf.gz.tbi,CLNSIG;CLNDN;CLNREVSTAT,ClinVar_,
-/scratch/pawsey1152/snguyen/databases/cosmic/Cosmic_GenomeScreensMutant_Normal_v103_GRCh38.vcf.gz,/scratch/pawsey1152/snguyen/databases/cosmic/Cosmic_GenomeScreensMutant_Normal_v103_GRCh38.vcf.gz.tbi,GENE;STRAND;CDS;AA,COSMIC_,
