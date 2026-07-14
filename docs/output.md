@@ -479,7 +479,17 @@ If the haplotype-called VCF files are not filtered, then Sarek should be run wit
 [GATK Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/5358911630107-Mutect2) calls somatic SNVs and indels via local assembly of haplotypes.
 When `--joint_mutect2` is used, Mutect2 subworkflow outputs will be saved in a subfolder named with the patient ID and `{patient}.mutect2.vcf.gz` file will contain variant calls from all of the normal and tumor samples of the patient.
 For further reading and documentation see the [Mutect2 manual](https://gatk.broadinstitute.org/hc/en-us/articles/360035531132).
-It is not required, but recommended to have a [panel of normals (PON)](https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON) using at least 40 normal samples to get filtered somatic calls. When using `--genome GATK.GRCh38`, a panel-of-normals file is available. However, it is _highly_ recommended to create one matching your tumor samples. Creating your own panel-of-normals is currently not natively supported by the pipeline. See [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035531132) for how to create one manually.
+It is not required, but recommended to have a [panel of normals (PON)](https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON) using at least 40 normal samples to get filtered somatic calls. When using `--genome GATK.GRCh38`, a panel-of-normals file is available. However, it is _highly_ recommended to create one matching your tumor samples. Supply `pon_db` in the input samplesheet for normal samples to create or append the corresponding GenomicsDB workspace.
+
+<details markdown="1">
+<summary>Output files for panel-of-normals generation</summary>
+
+**Output directory: `{outdir}/pon/<workspace>/`**
+
+- `<workspace>.vcf.gz` and `<workspace>.vcf.gz.tbi`
+  - Panel-of-normals VCF generated from the GenomicsDB workspace and its tabix index.
+
+</details>
 
 <details markdown="1">
 <summary>Output files for tumor-only and tumor/normal paired samples</summary>

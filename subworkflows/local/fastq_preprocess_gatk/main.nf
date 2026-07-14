@@ -158,7 +158,7 @@ workflow FASTQ_PREPROCESS_GATK {
         // This is needed to group reads from the same sample together using groupKey to avoid stalling the workflow
         // when reads from different samples are mixed together
         reads_for_alignment.map { meta, reads ->
-                [ meta.subMap('patient', 'sample', 'sex', 'status'), reads ]
+                [ meta.subMap('patient', 'sample', 'sex', 'status', 'pon_db'), reads ]
             }
             .groupTuple()
             .map { meta, reads ->

@@ -22,6 +22,7 @@ input:
         An input channel containing the following files:
         - input: One or more BAM/CRAM files
         - input_index: The index/indices from the BAM/CRAM file(s)
+        - meta.pon_db: Path to the GenomicsDB workspace to create or append
         Structure: [ meta, path(input), path(input_index) ]
   - ch_fasta:
       type: list

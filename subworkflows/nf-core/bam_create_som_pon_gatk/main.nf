@@ -14,7 +14,6 @@ workflow BAM_CREATE_SOM_PON_GATK {
     ch_fasta // channel: [ val(meta), path(fasta) ]
     ch_fai // channel: [ val(meta), path(fai), path(gzi) ]
     ch_dict // channel: [ val(meta), path(dict) ]
-    val_pon_norm // string:  name for panel of normals
     ch_intervals_gendb // channel: [ path(interval_file) ]
     ch_intervals_num // channel: [ path(intervals), val(num_intervals) ] or [ [], 0 ] if no intervals
 
@@ -33,8 +32,6 @@ workflow BAM_CREATE_SOM_PON_GATK {
         ch_fasta,
         ch_fai,
         ch_dict,
-        [],
-        [],
         [],
         [],
         [],
@@ -77,29 +74,61 @@ workflow BAM_CREATE_SOM_PON_GATK {
         .mix(GATK4_MERGEMUTECTSTATS.out.stats)
         .map { meta, stats -> [meta - meta.subMap('num_intervals'), stats] }
 
-    ch_gendb_input = channel.of([id: val_pon_norm])
-        .combine(ch_vcf.collect { _meta, vcf -> [vcf] }.toList())
-        .combine(ch_tbi.collect { _meta, tbi -> [tbi] }.toList())
+    ch_gendb_input = ch_vcf
+        .join(ch_tbi, failOnDuplicate: true, failOnMismatch: true)
+        .map { meta, vcf, tbi -> [meta.pon_db, vcf, tbi] }
+        .groupTuple()
+        .map { pon_db, vcfs, tbis ->
+            java.nio.file.Path pon_db_path = file(pon_db).toAbsolutePath()
+            [
+                [
+                    id: pon_db_path.fileName.toString(),
+                    pon_db: pon_db_path.toString(),
+                    pon_db_exists: pon_db_path.exists(),
+                    pon_db_parent: pon_db_path.parent.toString(),
+                ],
+                vcfs,
+                tbis,
+            ]
+        }
         .combine(ch_intervals_gendb)
         .combine(ch_dict.map { _meta, dict -> [dict] })
-        .map { meta, vcf, tbi, interval, dict -> [meta, vcf, tbi, interval, [], dict] }
+        .map { meta, vcf, tbi, interval, dict ->
+            [
+                meta,
+                vcf,
+                tbi,
+                interval,
+                meta.pon_db_exists ? file(meta.pon_db, checkIfExists: true) : [],
+                dict,
+            ]
+        }
 
-    // Convert all sample vcfs into a genomicsdb workspace using genomicsdbimport
+    // Create a new workspace or append to the existing workspace for each pon_db.
     GATK4_GENOMICSDBIMPORT(
         ch_gendb_input,
         false,
-        false,
+        ch_gendb_input.map { meta, _vcf, _tbi, _interval, _workspace, _dict -> meta.pon_db_exists },
         false,
     )
 
     // Create PON from the genomicsdb workspace using createsomaticpanelofnormals
-    GATK4_CREATESOMATICPANELOFNORMALS(GATK4_GENOMICSDBIMPORT.out.genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> [meta, fai] }, ch_dict)
+    genomicsdb = GATK4_GENOMICSDBIMPORT.out.genomicsdb.mix(GATK4_GENOMICSDBIMPORT.out.updatedb)
+    GATK4_CREATESOMATICPANELOFNORMALS(genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> [meta, fai] }, ch_dict)
+
+    versions = channel.empty()
+        .mix(
+            GATK4_MUTECT2.out.versions,
+            GATK4_MERGEMUTECTSTATS.out.versions,
+            GATK4_GENOMICSDBIMPORT.out.versions,
+        )
 
     emit:
-    genomicsdb    = GATK4_GENOMICSDBIMPORT.out.genomicsdb // channel: [ val(meta), path(genomicsdb) ]
+    genomicsdb // channel: [ val(meta), path(genomicsdb) ]
     mutect2_index = ch_tbi // channel: [ val(meta), path(tbi) ]
     mutect2_stats = ch_stats // channel: [ val(meta), path(stats) ]
     mutect2_vcf   = ch_vcf // channel: [ val(meta), path(vcf) ]
     pon_index     = GATK4_CREATESOMATICPANELOFNORMALS.out.tbi // channel: [ val(meta), path(tbi) ]
     pon_vcf       = GATK4_CREATESOMATICPANELOFNORMALS.out.vcf // channel: [ val(meta), path(vcf) ]
+    versions      // channel: [ versions.yml ]
 }

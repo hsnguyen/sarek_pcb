@@ -33,6 +33,9 @@ include { FASTQ_PREPROCESS_PARABRICKS                       } from '../../subwor
 // CRAM_TO_BAM conversion
 include { SAMTOOLS_CONVERT as CRAM_TO_BAM                   } from '../../modules/nf-core/samtools/convert'
 
+// Create a somatic panel of normals
+include { BAM_CREATE_SOM_PON_GATK                           } from '../../subworkflows/nf-core/bam_create_som_pon_gatk'
+
 // Variant calling on a single normal sample
 include { BAM_VARIANT_CALLING_GERMLINE_ALL                  } from '../../subworkflows/local/bam_variant_calling_germline_all'
 
@@ -276,6 +279,20 @@ workflow SAREK {
 
     reports = reports.mix(CRAM_SAMPLEQC.out.reports)
     versions = versions.mix(CRAM_SAMPLEQC.out.versions)
+
+    // Build or append the requested PoN workspace from normal samples. This is
+    // independent of --pon, which remains the reference VCF used by Mutect2.
+    BAM_CREATE_SOM_PON_GATK(
+        cram_variant_calling
+            .filter { meta, _cram, _crai -> meta.status == 0 && meta.pon_db },
+        fasta,
+        fasta_fai,
+        dict,
+        intervals_bed_combined_for_variant_calling,
+        intervals_and_num_intervals,
+    )
+
+    versions = versions.mix(BAM_CREATE_SOM_PON_GATK.out.versions)
 
     if (tools) {
 

@@ -95,6 +95,7 @@ Output from Variant Calling and/or Annotation will be in a specific directory fo
 | `cram`     | Full path to CRAM file                                                                                                                                                                                                                                                                                                            |
 | `crai`     | Full path to CRAM index file                                                                                                                                                                                                                                                                                                      |
 | `table`    | Full path to recalibration table file                                                                                                                                                                                                                                                                                             |
+| `pon_db`   | Path to a GenomicsDB workspace to create or append from this normal sample. Only valid for `status` `0`; it is independent of the `--pon` Mutect2 PON VCF parameter. |
 | `vcf`      | Full path to vcf file                                                                                                                                                                                                                                                                                                             |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
@@ -894,7 +895,22 @@ In particular, in cloud computing setting it is often advisable to reduce the nu
 
 ## How to create a panel-of-normals for Mutect2
 
-For a detailed tutorial on how to create a panel-of-normals, see [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035531132).
+Add an optional `pon_db` column to normal (`status` `0`) samples in the
+samplesheet. Its value is the path to a GenomicsDB workspace. Sarek runs
+Mutect2 in panel-of-normals mode for those samples, creates the workspace when
+the path does not exist, or appends their calls when it does. It then writes
+the resulting panel VCF and index to `{outdir}/pon/<workspace>/`.
+
+```csv
+patient,sample,status,lane,fastq_1,fastq_2,pon_db
+pon1,normal1,0,L001,normal1_R1.fastq.gz,normal1_R2.fastq.gz,/data/pon/my_pon
+pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz,/data/pon/my_pon
+```
+
+`pon_db` is independent of `--pon`: the samplesheet column identifies the
+GenomicsDB workspace to maintain, whereas `--pon` supplies an existing PON VCF
+to Mutect2 for somatic variant calling. A workspace may only be assigned to
+normal samples.
 
 ## How to use varlociraptor
 

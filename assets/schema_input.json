@@ -108,6 +108,13 @@
                 "type": "number",
                 "exists": true
             },
+            "pon_db": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Panel-of-normals GenomicsDB workspace path cannot contain spaces",
+                "description": "GenomicsDB workspace to create or append with this normal sample.",
+                "meta": ["pon_db"]
+            },
             "vcf": {
                 "errorMessage": "VCF file for reads 1 cannot contain spaces, has to be a string, has to exist and must have extension '.vcf' or '.vcf.gz'",
                 "type": "string",

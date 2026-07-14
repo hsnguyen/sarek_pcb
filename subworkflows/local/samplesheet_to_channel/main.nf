@@ -61,6 +61,18 @@ workflow SAMPLESHEET_TO_CHANNEL {
         }
 
     ch_from_samplesheet
+        .filter { meta, _fastq_1, _fastq_2, _spring_1, _spring_2, _table, _cram, _crai, _bam, _bai, _contamination, _vcf, _variantcaller -> meta.pon_db }
+        .map { meta, _fastq_1, _fastq_2, _spring_1, _spring_2, _table, _cram, _crai, _bam, _bai, _contamination, _vcf, _variantcaller ->
+            [meta.pon_db, meta.status]
+        }
+        .groupTuple()
+        .map { pon_db, statuses ->
+            if (statuses.any { status -> status != 0 }) {
+                error("Panel-of-normals workspace '${pon_db}' can only be assigned to normal samples (status 0).")
+            }
+        }
+
+    ch_from_samplesheet
         .map { meta, _fastq_1, _fastq_2, _spring_1, _spring_2, _table, _cram, _crai, _bam, _bai, _contamination, _vcf, _variantcaller ->
             // Create a unique key for patient-sample-status-lane combination
             def combination_key = "${meta.patient}-${meta.sample}-${meta.status}-${meta.lane}"
