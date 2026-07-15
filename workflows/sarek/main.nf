@@ -286,7 +286,7 @@ workflow SAREK {
         cram_variant_calling
             .filter { meta, _cram, _crai -> meta.status == 0 && meta.pon_db },
         fasta,
-        fasta_fai,
+        fasta_fai.map { meta, fai_ -> [meta, fai_, []] },
         dict,
         intervals_bed_combined_for_variant_calling,
         intervals_and_num_intervals,

@@ -114,7 +114,7 @@ workflow BAM_CREATE_SOM_PON_GATK {
 
     // Create PON from the genomicsdb workspace using createsomaticpanelofnormals
     genomicsdb = GATK4_GENOMICSDBIMPORT.out.genomicsdb.mix(GATK4_GENOMICSDBIMPORT.out.updatedb)
-    GATK4_CREATESOMATICPANELOFNORMALS(genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> [meta, fai] }, ch_dict)
+    GATK4_CREATESOMATICPANELOFNORMALS(genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> tuple(meta, fai) }, ch_dict)
 
     versions = channel.empty()
         .mix(
