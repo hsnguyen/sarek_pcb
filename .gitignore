@@ -17,3 +17,4 @@ test.xml
 modules/nf-core/**/tests/
 subworkflows/nf-core/**/tests/
 assets/pcb/
+.lineage/
