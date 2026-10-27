@@ -2,40 +2,40 @@ include { readStructure } from 'plugin/nf-fgbio'
 
 workflow SAMPLESHEET_TO_CHANNEL {
     take:
-    ch_from_samplesheet           // samplesheet
-    aligner                       // String: aligner
-    ascat_alleles                 // Path: ascat alleles
-    ascat_loci                    // Path: ascat loci
-    ascat_loci_gc                 // Path: ascat loci gc
-    ascat_loci_rt                 // Path: ascat loci rt
-    bcftools_annotations          // Path: bcftools annotations
-    bcftools_annotations_tbi      // Path: bcftools annotations tbi
-    bcftools_header_lines         // Path: bcftools header lines
-    build_only_index              // Boolean: build only index
-    dbsnp                         // Path: dbsnp
-    fasta                         // Path: fasta
-    germline_resource             // Path: germline resource
-    intervals                     // Path: intervals
-    joint_germline                // Boolean: joint_germline
-    joint_mutect2                 // Boolean: joint_mutect2
-    known_indels                  // Path: known indels
-    known_snps                    // Path: known snps
-    no_intervals                  // Boolean: no intervals
-    pon                           // Path: pon
-    sentieon_dnascope_emit_mode   // String: sentieon dnascope emit mode
+    ch_from_samplesheet // samplesheet
+    aligner // String: aligner
+    ascat_alleles // Path: ascat alleles
+    ascat_loci // Path: ascat loci
+    ascat_loci_gc // Path: ascat loci gc
+    ascat_loci_rt // Path: ascat loci rt
+    bcftools_annotations // Path: bcftools annotations
+    bcftools_annotations_tbi // Path: bcftools annotations tbi
+    bcftools_header_lines // Path: bcftools header lines
+    build_only_index // Boolean: build only index
+    dbsnp // Path: dbsnp
+    fasta // Path: fasta
+    germline_resource // Path: germline resource
+    intervals // Path: intervals
+    joint_germline // Boolean: joint_germline
+    joint_mutect2 // Boolean: joint_mutect2
+    known_indels // Path: known indels
+    known_snps // Path: known snps
+    no_intervals // Boolean: no intervals
+    mutect2_pon // Path: Mutect2 PoN
+    sentieon_dnascope_emit_mode // String: sentieon dnascope emit mode
     sentieon_haplotyper_emit_mode // String: sentieon haplotyper emit mode
-    seq_center                    // String: seq center
-    seq_platform                  // String: seq platform
-    skip_tools                    // Array: skip tools
-    snpeff_cache                  // Path: snpeff cache
-    snpeff_db                     // String: snpeff db
-    step                          // String: step
-    tools                         // Array: tools
-    umi_length                    // Integer: umi length for fastp extraction
-    umi_location                  // String: umi location for fastp extraction
-    umi_in_read_header            // Boolean: umi in read header
-    umi_read_structure            // String: umi read structure for fgbio consensus
-    wes                           // wes
+    seq_center // String: seq center
+    seq_platform // String: seq platform
+    skip_tools // Array: skip tools
+    snpeff_cache // Path: snpeff cache
+    snpeff_db // String: snpeff db
+    step // String: step
+    tools // Array: tools
+    umi_length // Integer: umi length for fastp extraction
+    umi_location // String: umi location for fastp extraction
+    umi_in_read_header // Boolean: umi in read header
+    umi_read_structure // String: umi read structure for fgbio consensus
+    wes // wes
 
     main:
     ch_from_samplesheet.dump(tag: "ch_from_samplesheet")
@@ -67,7 +67,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
         .groupTuple()
         .map { pon_db, statuses ->
             if (statuses.any { status -> status != 0 }) {
-                error("Panel-of-normals workspace '${pon_db}' can only be assigned to normal samples (status 0).")
+                error("Panel-of-normals types '${pon_db}' can only be assigned to normal samples (status 0).")
             }
         }
 
@@ -100,9 +100,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
             // Return the patient and the list of sample ids
             [patient, samples.collect { sample -> sample.sample }]
         }
-        // Flatten to [sample_id, patient] pairs
         .flatMap { patient, sample_ids -> sample_ids.collect { sample_id -> [sample_id, patient] } }
-        // Group by sample_id to collect all patient ids per sample
         .groupTuple()
         .map { sample_id, patient_ids ->
             def unique_patients = patient_ids.unique()
@@ -132,7 +130,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
             def (meta, fastq_1, fastq_2, spring_1, spring_2, table, cram, crai, bam, bai, contamination, vcf, variantcaller) = ch_items
 
             if (contamination) {
-                meta = meta + [ contamination: contamination]
+                meta = meta + [contamination: contamination]
             }
             if ((meta.lane || meta.lane == 0) && fastq_2) {
                 // mapping from fastq files
@@ -308,11 +306,11 @@ workflow SAMPLESHEET_TO_CHANNEL {
         error("${aligner} is currently not compatible with FGBio UMI handling. Please choose a different aligner.")
     }
 
-    if (step == 'mapping' && aligner.contains("parabricks" ) && umi_in_read_header) {
+    if (step == 'mapping' && aligner.contains("parabricks") && umi_in_read_header) {
         error("${aligner} is currently not compatible with extracting UMIs from read headers. Please choose a different aligner.")
     }
 
-    if (step == 'mapping' && aligner.contains("parabricks")  && umi_location) {
+    if (step == 'mapping' && aligner.contains("parabricks") && umi_location) {
         error("${aligner} is currently not compatible with UMI extraction from reads through fastp. Please choose a different aligner.")
     }
 
@@ -323,7 +321,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
     if (step == 'mapping' && umi_read_structure && umi_in_read_header) {
         // If UMIs are in read header, then we cannot use umi_read_structure separately, and instead the UMIs will be taken directly from the header
         // This requires us to set umi_read_structure to "+T +T" to indicate that UMIs are in the read header
-        if( umi_read_structure != "+T +T" ) {
+        if (umi_read_structure != "+T +T") {
             error("UMI extraction from read headers (`umi_in_read_header`) will override  `umi_read_structure` when using fgbio consensus generation. Please set `umi_read_structure` to '+T +T'.")
         }
     }
@@ -341,20 +339,23 @@ workflow SAMPLESHEET_TO_CHANNEL {
     }
 
     // MarkDuplicatesSpark can't do UMI based deduplication
-    if (tools && tools.split(',').contains('markduplicates_spark') && (umi_in_read_header || umi_location )) {
+    if (tools && tools.split(',').contains('markduplicates_spark') && (umi_in_read_header || umi_location)) {
         error("UMI based deduplication is not supported by MarkDuplicatesSpark. Please choose a different tool for deduplication.")
     }
 
     // Check the UMI read structure is correct using fgbio plugin
     // Copied from fastquorum
-    if( umi_read_structure) {
-        umi_read_structure.tokenize(" ").each { rs->
-        // If parsing the read structure fails, then a java.lang.reflect.InvocationTargetException will be thrown, with
-        // the cause containing the exception produced by fgbio.
-        try {
-            readStructure(rs)
-        } catch (java.lang.reflect.InvocationTargetException ex) {
-            def message = """
+    if (umi_read_structure) {
+        umi_read_structure
+            .tokenize(" ")
+            .each { rs ->
+                // If parsing the read structure fails, then a java.lang.reflect.InvocationTargetException will be thrown, with
+                // the cause containing the exception produced by fgbio.
+                try {
+                    readStructure(rs)
+                }
+                catch (ex: InvocationTargetException) {
+                    def message = """
                 |Please check the input UMI Read structure`${umi_read_structure}` invalid
                 |
                 |   ${ex.getCause().getMessage()}
@@ -363,10 +364,10 @@ workflow SAMPLESHEET_TO_CHANNEL {
                 |
                 |   Validate your read structures here: https://fulcrumgenomics.github.io/fgbio/validate-read-structure.html
                 |""".stripMargin()
-            error(message)
-            throw ex
-        }
-    }
+                    error(message)
+                    throw ex
+                }
+            }
     }
 
     // Fails or warns when missing files or params for ascat
@@ -387,13 +388,13 @@ workflow SAMPLESHEET_TO_CHANNEL {
 
     // Warns when missing files or params for mutect2
     if (tools && tools.split(',').contains('mutect2')) {
-        if (!pon) {
+        if (!mutect2_pon) {
             log.warn("No Panel-of-normal was specified for Mutect2.\nIt is highly recommended to use one: https://gatk.broadinstitute.org/hc/en-us/articles/5358911630107-Mutect2\nFor more information on how to create one: https://gatk.broadinstitute.org/hc/en-us/articles/5358921041947-CreateSomaticPanelOfNormals-BETA-")
         }
         if (!germline_resource) {
             log.warn("If Mutect2 is specified without a germline resource, no filtering will be done.\nIt is recommended to use one: https://gatk.broadinstitute.org/hc/en-us/articles/5358911630107-Mutect2")
         }
-        if (pon && pon.contains("/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/1000g_pon.hg38.vcf.gz")) {
+        if (mutect2_pon && mutect2_pon.contains("/Homo_sapiens/GATK/GRCh38/Annotation/GATKBundle/1000g_pon.hg38.vcf.gz")) {
             log.warn("The default Panel-of-Normals provided by GATK is used for Mutect2.\nIt is highly recommended to generate one from normal samples that are technical similar to the tumor ones.\nFor more information: https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON-")
         }
     }

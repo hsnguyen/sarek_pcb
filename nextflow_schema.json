@@ -13,6 +13,13 @@
             "help_text": "Specify input samplesheet, step and output folder.",
             "required": ["step", "outdir"],
             "properties": {
+                "mode": {
+                    "type": "string",
+                    "default": "sarek",
+                    "description": "Workflow to run.",
+                    "help_text": "Use `sarek` for variant analysis or `panels` to create requested panels of normals.",
+                    "enum": ["sarek", "panels"]
+                },
                 "input": {
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "A design file with information about the samples in your experiment. Use this parameter to specify the location of the input files. It has to be a comma-separated file with a header row. See [usage docs](https://nf-co.re/sarek/usage#input).\n\nIf no input file is specified, sarek will attempt to locate one in the `{outdir}` directory. If no input should be supplied, i.e. when --step is supplied or --build_only_index, then set --input false",
@@ -454,7 +461,7 @@
                     "description": "Do not analyze soft clipped bases in the reads for GATK Mutect2.",
                     "help_text": "use the `--dont-use-soft-clipped-bases` params with GATK Mutect2."
                 },
-                "pon": {
+                "mutect2_pon": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "format": "file-path",
@@ -463,7 +470,7 @@
                     "description": "Panel-of-normals VCF (bgzipped) for GATK Mutect2",
                     "help_text": "Without PON, there will be no calls with PASS in the INFO field, only an unfiltered VCF is written.\nIt is highly recommended to make your own PON, as it depends on sequencer and library preparation.\n\nThe pipeline is shipped with a panel-of-normals for `--genome GATK.GRCh38` provided by [GATK](https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON-). \n\nSee [PON documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360042479112-CreateSomaticPanelOfNormals-BETA)\n> **NB** PON file should be bgzipped."
                 },
-                "pon_tbi": {
+                "mutect2_pon_tbi": {
                     "type": "string",
                     "fa_icon": "fas fa-file",
                     "format": "file-path",

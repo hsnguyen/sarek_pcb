@@ -6,15 +6,15 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { UTILS_NFSCHEMA_PLUGIN   } from '../../nf-core/utils_nfschema_plugin'
-include { paramsSummaryMap        } from 'plugin/nf-schema'
-include { samplesheetToList       } from 'plugin/nf-schema'
-include { paramsHelp              } from 'plugin/nf-schema'
-include { completionEmail         } from '../../nf-core/utils_nfcore_pipeline'
-include { completionSummary       } from '../../nf-core/utils_nfcore_pipeline'
-include { UTILS_NFCORE_PIPELINE   } from '../../nf-core/utils_nfcore_pipeline'
+include { UTILS_NFSCHEMA_PLUGIN } from '../../nf-core/utils_nfschema_plugin'
+include { paramsSummaryMap } from 'plugin/nf-schema'
+include { samplesheetToList } from 'plugin/nf-schema'
+include { paramsHelp } from 'plugin/nf-schema'
+include { completionEmail } from '../../nf-core/utils_nfcore_pipeline'
+include { completionSummary } from '../../nf-core/utils_nfcore_pipeline'
+include { UTILS_NFCORE_PIPELINE } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE } from '../../nf-core/utils_nextflow_pipeline'
-include { SAMPLESHEET_TO_CHANNEL  } from '../samplesheet_to_channel'
+include { SAMPLESHEET_TO_CHANNEL } from '../samplesheet_to_channel'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,7 +81,7 @@ workflow PIPELINE_INITIALISATION {
         before_text,
         after_text,
         command,
-        false
+        false,
     )
 
     // Check config provided to the pipeline
@@ -124,8 +124,8 @@ workflow PIPELINE_INITIALISATION {
         params.mappability,
         params.multiqc_config,
         params.ngscheckmate_bed,
-        params.pon,
-        params.pon_tbi,
+        params.mutect2_pon,
+        params.mutect2_pon_tbi,
         params.sentieon_dnascope_model,
         params.spliceai_indel,
         params.spliceai_indel_tbi,
@@ -169,7 +169,7 @@ workflow PIPELINE_INITIALISATION {
         params.known_indels,
         params.known_snps,
         params.no_intervals,
-        params.pon,
+        params.mutect2_pon,
         params.sentieon_dnascope_emit_mode,
         params.sentieon_haplotyper_emit_mode,
         params.seq_center,

@@ -110,9 +110,9 @@
             },
             "pon_db": {
                 "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Panel-of-normals GenomicsDB workspace path cannot contain spaces",
-                "description": "GenomicsDB workspace to create or append with this normal sample.",
+                "pattern": "^\\S+(;\\S+)*$",
+                "errorMessage": "Panel-of-normals types must be semicolon-separated values without spaces",
+                "description": "Panel-of-normals types requested for this normal sample.",
                 "meta": ["pon_db"]
             },
             "vcf": {

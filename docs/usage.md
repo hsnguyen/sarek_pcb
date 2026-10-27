@@ -95,7 +95,7 @@ Output from Variant Calling and/or Annotation will be in a specific directory fo
 | `cram`     | Full path to CRAM file                                                                                                                                                                                                                                                                                                            |
 | `crai`     | Full path to CRAM index file                                                                                                                                                                                                                                                                                                      |
 | `table`    | Full path to recalibration table file                                                                                                                                                                                                                                                                                             |
-| `pon_db`   | Path to a GenomicsDB workspace to create or append from this normal sample. Only valid for `status` `0`; it is independent of the `--pon` Mutect2 PON VCF parameter. |
+| `pon_db`   | Semicolon-separated panel types to create from this normal sample. Only valid for `status` `0`; use `mutect2` to create a Mutect2 panel with `--mode panels`. |
 | `vcf`      | Full path to vcf file                                                                                                                                                                                                                                                                                                             |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
@@ -908,21 +908,22 @@ In particular, in cloud computing setting it is often advisable to reduce the nu
 
 ## How to create a panel-of-normals for Mutect2
 
-Add an optional `pon_db` column to normal (`status` `0`) samples in the
-samplesheet. Its value is the path to a GenomicsDB workspace. Sarek runs
-Mutect2 in panel-of-normals mode for those samples, creates the workspace when
-the path does not exist, or appends their calls when it does. It then writes
-the resulting panel VCF and index to `{outdir}/pon/<workspace>/`.
+Use `--mode panels` to create panels of normals. Add an optional `pon_db`
+column to normal (`status` `0`) samples in the samplesheet. Its value lists
+requested panel types separated by semicolons. `mutect2` creates a Mutect2
+panel from all selected normal samples and writes the workspace, VCF, and index
+to `{outdir}/pon/mutect2/`.
 
 ```csv
 patient,sample,status,lane,fastq_1,fastq_2,pon_db
-pon1,normal1,0,L001,normal1_R1.fastq.gz,normal1_R2.fastq.gz,/data/pon/my_pon
-pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz,/data/pon/my_pon
+pon1,normal1,0,L001,normal1_R1.fastq.gz,normal1_R2.fastq.gz,mutect2
+pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz,mutect2;cnvkit
 ```
 
-`pon_db` is independent of `--pon`: the samplesheet column identifies the
-GenomicsDB workspace to maintain, whereas `--pon` supplies an existing PON VCF
-to Mutect2 for somatic variant calling. A workspace may only be assigned to
+`pon_db` is independent of `--mutect2_pon`: the samplesheet column selects
+panels to create, whereas `--mutect2_pon` supplies an existing PON VCF to
+Mutect2 for somatic variant calling. Panel types other than `mutect2` are
+accepted for future panel workflows. A panel type may only be assigned to
 normal samples.
 
 ## How to use varlociraptor
@@ -1065,8 +1066,8 @@ For GATK.GRCh38 the links for each reference file and the corresponding processe
 | known_snps            | BaseRecalibrator(Spark), FilterVariantTranches, VariantRecalibrator                                                                                                                                                                                                                                                                                                                                                                                                          | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) |                                                                                      |
 | known_snps_tbi        | BaseRecalibrator(Spark), FilterVariantTranches, VariantRecalibrator                                                                                                                                                                                                                                                                                                                                                                                                          | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) |
 | mappability           | ControlFREEC                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | http://xfer.curie.fr/get/vyIi4w8EONl/out100m2_hg38.zip                                                                | http://boevalab.inf.ethz.ch/FREEC/tutorial.html                                      |
-| pon                   | Mutect2                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) | https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON- |
-| pon_tbi               | Mutect2                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) | https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON- |
+| mutect2_pon           | Mutect2                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) | https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON- |
+| mutect2_pon_tbi       | Mutect2                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | [GATKBundle](https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/) | https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON- |
 
 ## What happened with snpeff db 105
 
