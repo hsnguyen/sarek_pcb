@@ -1,4 +1,9 @@
 include { BAM_CREATE_SOM_PON_GATK } from '../subworkflows/nf-core/bam_create_som_pon_gatk'
+include { CNVKIT_BATCH } from '../modules/nf-core/cnvkit/batch'
+include { PURECN_COVERAGE } from '../modules/nf-core/purecn/coverage'
+include { PURECN_INTERVALFILE } from '../modules/nf-core/purecn/intervalfile'
+include { PURECN_NORMALDB } from '../modules/nf-core/purecn/normaldb'
+include { SAMTOOLS_VIEW } from '../modules/nf-core/samtools/view'
 include { SAREK } from './sarek'
 
 workflow PANELS_CREATION {
@@ -66,16 +71,19 @@ workflow PANELS_CREATION {
     snpsift_db
 
     main:
-    ch_normal_samples_for_mutect2_pon = input_sample
+    ch_normal_samples_for_panels = input_sample
         .filter { meta, _input, _input_index ->
-            meta.status == 0 && meta.pon_db?.tokenize(';')?.contains('mutect2')
+            meta.status == 0 && meta.pon_db
         }
         .ifEmpty {
-            error("No normal samples request a Mutect2 panel of normals. Set 'pon_db' to 'mutect2' for at least one normal sample.")
+            error("No normal samples request a panel of normals. Set 'pon_db' for at least one normal sample.")
         }
 
+    ch_panel_requests_by_id = ch_normal_samples_for_panels
+        .map { meta, _input, _input_index -> [meta.id, meta] }
+
     SAREK(
-        ch_normal_samples_for_mutect2_pon,
+        ch_normal_samples_for_panels,
         aligner,
         skip_tools,
         step,
@@ -139,13 +147,37 @@ workflow PANELS_CREATION {
         snpsift_db,
     )
 
-    ch_mutect2_pon_input = SAREK.out.cram_variant_calling.map { meta, cram, crai ->
-        [
-            meta + [pon_type: 'mutect2', pon_workspace: "${params.outdir}/pon/mutect2/mutect2"],
-            cram,
-            crai,
-        ]
+    ch_panel_alignments = SAREK.out.cram_variant_calling
+        .map { meta, alignment, index -> [meta.id, meta, alignment, index] }
+        .join(ch_panel_requests_by_id, failOnDuplicate: true, failOnMismatch: true)
+        .map { _id, meta, alignment, index, request_meta ->
+            [meta + request_meta.subMap('pon_db'), alignment, index]
+        }
+
+    ch_panel_alignments_by_format = ch_panel_alignments.branch { _meta, alignment, _index ->
+        bam: alignment.toString().endsWith('.bam')
+        cram: alignment.toString().endsWith('.cram')
     }
+
+    SAMTOOLS_VIEW(
+        ch_panel_alignments_by_format.cram,
+        fasta.combine(fasta_fai).map { meta, fasta_file, _meta_fai, fai -> [meta, fasta_file, fai] }.collect(),
+        [[:], []],
+        [[:], []],
+        'bai',
+    )
+
+    ch_panel_bam = ch_panel_alignments_by_format.bam.mix(SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_VIEW.out.bai, failOnDuplicate: true, failOnMismatch: true))
+
+    ch_mutect2_pon_input = ch_panel_alignments
+        .filter { meta, _cram, _crai -> hasPonType(meta, 'mutect2') }
+        .map { meta, cram, crai ->
+            [
+                meta + [pon_type: 'mutect2', pon_workspace: "${params.outdir}/pon/mutect2/mutect2"],
+                cram,
+                crai,
+            ]
+        }
 
     BAM_CREATE_SOM_PON_GATK(
         ch_mutect2_pon_input,
@@ -156,9 +188,44 @@ workflow PANELS_CREATION {
         intervals_and_num_intervals,
     )
 
+    CNVKIT_BATCH(
+        ch_panel_bam.filter { meta, _bam, _bai -> hasPonType(meta, 'cnvkit') }.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
+        fasta.map { meta, fasta_file -> [meta, fasta_file, []] },
+        intervals_bed_combined.map { bed -> [[id: 'cnvkit'], bed] },
+        [[:], []],
+        true,
+    )
+
+    PURECN_INTERVALFILE(
+        intervals_bed_combined.map { bed -> [[id: 'purecn'], bed] },
+        fasta,
+        params.purecn_genome ?: params.ascat_genome,
+    )
+
+    PURECN_COVERAGE(
+        ch_panel_bam.filter { meta, _bam, _bai -> hasPonType(meta, 'purecn') },
+        PURECN_INTERVALFILE.out.txt.collect(),
+    )
+
+    PURECN_NORMALDB(
+        PURECN_COVERAGE.out.txt.collect().map { coverage_files -> [[id: 'purecn'], coverage_files, [], []] },
+        params.purecn_genome ?: params.ascat_genome,
+        params.purecn_assay,
+    )
+
     emit:
     multiqc_publish = SAREK.out.multiqc_publish
     multiqc_report = SAREK.out.multiqc_report
+    cnvkit_pon = CNVKIT_BATCH.out.cnn
     mutect2_pon = BAM_CREATE_SOM_PON_GATK.out.pon_vcf
     mutect2_pon_tbi = BAM_CREATE_SOM_PON_GATK.out.pon_index
+    purecn_normaldb = PURECN_NORMALDB.out.rds
+}
+
+def hasPonType(meta, ponType) {
+    meta.pon_db
+        ?.tokenize(';')
+        ?.any { requestedPonType ->
+            requestedPonType.equalsIgnoreCase(ponType)
+        }
 }

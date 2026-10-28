@@ -117,13 +117,6 @@ workflow BAM_CREATE_SOM_PON_GATK {
     genomicsdb = GATK4_GENOMICSDBIMPORT.out.genomicsdb.mix(GATK4_GENOMICSDBIMPORT.out.updatedb)
     GATK4_CREATESOMATICPANELOFNORMALS(genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> tuple(meta, fai) }, ch_dict)
 
-    versions = channel.empty()
-        .mix(
-            GATK4_MUTECT2.out.versions,
-            GATK4_MERGEMUTECTSTATS.out.versions,
-            GATK4_GENOMICSDBIMPORT.out.versions,
-        )
-
     emit:
     genomicsdb // channel: [ val(meta), path(genomicsdb) ]
     mutect2_index = ch_tbi // channel: [ val(meta), path(tbi) ]
@@ -131,5 +124,4 @@ workflow BAM_CREATE_SOM_PON_GATK {
     mutect2_vcf = ch_vcf // channel: [ val(meta), path(vcf) ]
     pon_index = GATK4_CREATESOMATICPANELOFNORMALS.out.tbi // channel: [ val(meta), path(tbi) ]
     pon_vcf = GATK4_CREATESOMATICPANELOFNORMALS.out.vcf // channel: [ val(meta), path(vcf) ]
-    versions // channel: [ versions.yml ]
 }

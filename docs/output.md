@@ -494,7 +494,7 @@ If the haplotype-called VCF files are not filtered, then Sarek should be run wit
 [GATK Mutect2](https://gatk.broadinstitute.org/hc/en-us/articles/5358911630107-Mutect2) calls somatic SNVs and indels via local assembly of haplotypes.
 When `--joint_mutect2` is used, Mutect2 subworkflow outputs will be saved in a subfolder named with the patient ID and `{patient}.mutect2.vcf.gz` file will contain variant calls from all of the normal and tumor samples of the patient.
 For further reading and documentation see the [Mutect2 manual](https://gatk.broadinstitute.org/hc/en-us/articles/360035531132).
-It is not required, but recommended to have a [panel of normals (PON)](https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON) using at least 40 normal samples to get filtered somatic calls. When using `--genome GATK.GRCh38`, a panel-of-normals file is available. However, it is _highly_ recommended to create one matching your tumor samples. Run with `--mode panels` and set `pon_db` to `mutect2` for normal samples to create the Mutect2 panel.
+It is not required, but recommended to have a [panel of normals (PON)](https://gatk.broadinstitute.org/hc/en-us/articles/360035890631-Panel-of-Normals-PON) using at least 40 normal samples to get filtered somatic calls. When using `--genome GATK.GRCh38`, a panel-of-normals file is available. However, it is _highly_ recommended to create one matching your tumor samples. Run with `--mode panels` and set `pon_db` to `mutect2`, `cnvkit`, or `purecn` for normal samples to create the corresponding reference.
 
 <details markdown="1">
 <summary>Output files for panel-of-normals generation</summary>
@@ -503,6 +503,18 @@ It is not required, but recommended to have a [panel of normals (PON)](https://g
 
 - `mutect2.vcf.gz` and `mutect2.vcf.gz.tbi`
   - Panel-of-normals VCF generated from the GenomicsDB workspace and its tabix index.
+
+**Output directory: `{outdir}/pon/cnvkit/`**
+
+- `reference.cnn`
+  - CNVkit reference generated from all normal samples marked with `cnvkit`.
+
+**Output directory: `{outdir}/pon/purecn/`**
+
+- `normalDB_purecn_<genome>.rds`
+  - PureCN normal database generated from all normal samples marked with `purecn`.
+- `interval_weights_purecn_<genome>.png`
+  - Interval weights calculated for the PureCN normal database.
 
 </details>
 

@@ -77,7 +77,7 @@
                     },
                     "bwamem2/mem": {
                         "branch": "master",
-                        "git_sha": "62ce917fd775aaef732eb82019de069c765adfd3",
+                        "git_sha": "8327445b5266b0df32212e5c27407546d100429f",
                         "installed_by": ["modules"]
                     },
                     "cat/fastq": {
@@ -118,8 +118,7 @@
                     "controlfreec/assesssignificance": {
                         "branch": "master",
                         "git_sha": "8a34a4cc59c480816e45d3b68ca11b8eab2edff1",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/controlfreec/assesssignificance/controlfreec-assesssignificance.diff"
+                        "installed_by": ["modules"]
                     },
                     "controlfreec/freec": {
                         "branch": "master",
@@ -159,7 +158,7 @@
                     "ensemblvep/download": {
                         "branch": "master",
                         "git_sha": "db055f5f8c726a924bf51dadce3978da3bbdad7e",
-                        "installed_by": ["cache_download_ensemblvep_snpeff", "modules"]
+                        "installed_by": ["cache_download_ensemblvep_snpeff"]
                     },
                     "ensemblvep/vep": {
                         "branch": "master",
@@ -228,7 +227,7 @@
                     },
                     "gatk4/cnnscorevariants": {
                         "branch": "master",
-                        "git_sha": "21e4662ae927fdbc5fc04eec9bde38b0689d4954",
+                        "git_sha": "23cc7f9a23084488947f9f3311cfb0b868bdc203",
                         "installed_by": ["modules"]
                     },
                     "gatk4/createsequencedictionary": {
@@ -269,7 +268,7 @@
                     "gatk4/genomicsdbimport": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["bam_create_som_pon_gatk", "modules"]
+                        "installed_by": ["bam_create_som_pon_gatk"]
                     },
                     "gatk4/genotypegvcfs": {
                         "branch": "master",
@@ -303,28 +302,18 @@
                     },
                     "gatk4/mergemutectstats": {
                         "branch": "master",
-<<<<<<< HEAD
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["bam_create_som_pon_gatk", "modules"]
-=======
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["modules"]
->>>>>>> 3.10.0
+                        "installed_by": ["bam_create_som_pon_gatk"]
                     },
                     "gatk4/mergevcfs": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["bam_create_som_pon_gatk", "modules"]
+                        "installed_by": ["bam_create_som_pon_gatk"]
                     },
                     "gatk4/mutect2": {
                         "branch": "master",
-<<<<<<< HEAD
-                        "git_sha": "a97cba262e9367734e435dc07d2e3b7d6121ef3e",
-                        "installed_by": ["bam_create_som_pon_gatk", "modules"]
-=======
                         "git_sha": "f8001d415ee08634fee5019bd15c7fdaa2a1915d",
-                        "installed_by": ["modules"]
->>>>>>> 3.10.0
+                        "installed_by": ["bam_create_som_pon_gatk"]
                     },
                     "gatk4/variantrecalibrator": {
                         "branch": "master",
@@ -364,7 +353,7 @@
                     "htslib/bgziptabix": {
                         "branch": "master",
                         "git_sha": "37f69c8ca3eb3d038a5d44f33a329e49f44bd4f2",
-                        "installed_by": ["modules", "vcf_annotate_snpeff"]
+                        "installed_by": ["vcf_annotate_snpeff"]
                     },
                     "lofreq/callparallel": {
                         "branch": "master",
@@ -436,6 +425,21 @@
                         "git_sha": "3e0ec6464725c64d81abe928e15a6750d5fdd272",
                         "installed_by": ["modules"]
                     },
+                    "purecn/coverage": {
+                        "branch": "master",
+                        "git_sha": "df08a57a95635610b7dc0ebbf6d3e1260b957bac",
+                        "installed_by": ["modules"]
+                    },
+                    "purecn/intervalfile": {
+                        "branch": "master",
+                        "git_sha": "df08a57a95635610b7dc0ebbf6d3e1260b957bac",
+                        "installed_by": ["modules"]
+                    },
+                    "purecn/normaldb": {
+                        "branch": "master",
+                        "git_sha": "df08a57a95635610b7dc0ebbf6d3e1260b957bac",
+                        "installed_by": ["modules"]
+                    },
                     "rbt/vcfsplit": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
@@ -483,7 +487,7 @@
                     },
                     "samtools/view": {
                         "branch": "master",
-                        "git_sha": "9339809fcb90af8a8b7051e6cd914894d5c52002",
+                        "git_sha": "4dd270e412e2a7e78761be38aafa5cfa1dcdf891",
                         "installed_by": ["modules"]
                     },
                     "sentieon/applyvarcal": {
@@ -534,12 +538,12 @@
                     "snpeff/download": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["cache_download_ensemblvep_snpeff", "modules"]
+                        "installed_by": ["cache_download_ensemblvep_snpeff"]
                     },
                     "snpeff/snpeff": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
-                        "installed_by": ["modules", "vcf_annotate_snpeff"]
+                        "installed_by": ["vcf_annotate_snpeff"]
                     },
                     "snpsift/annmem": {
                         "branch": "master",
@@ -627,7 +631,7 @@
                 "nf-core": {
                     "bam_create_som_pon_gatk": {
                         "branch": "master",
-                        "git_sha": "f8001d415ee08634fee5019bd15c7fdaa2a1915d",
+                        "git_sha": "b2bcd8312599aacd849e69721e20ac8138018f83",
                         "installed_by": ["subworkflows"]
                     },
                     "bam_ngscheckmate": {
@@ -647,7 +651,7 @@
                     },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
-                        "git_sha": "c2b22d85f30a706a3073387f30380704fcae013b",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {

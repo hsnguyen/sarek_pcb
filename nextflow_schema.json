@@ -438,6 +438,15 @@
                     "help_text": "https://cnvkit.readthedocs.io/en/stable/pipeline.html?highlight=reference.cnn#batch",
                     "description": "Copy-number reference for CNVkit"
                 },
+                "purecn_assay": {
+                    "type": "string",
+                    "default": "WES",
+                    "description": "Assay name for PureCN normal database creation."
+                },
+                "purecn_genome": {
+                    "type": "string",
+                    "description": "Genome build for PureCN normal database creation. Defaults to the selected genome."
+                },
                 "freebayes_filter": {
                     "type": "string",
                     "default": "30",

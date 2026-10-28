@@ -354,7 +354,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
                 try {
                     readStructure(rs)
                 }
-                catch (ex: InvocationTargetException) {
+                catch (ex: java.lang.reflect.InvocationTargetException) {
                     def message = """
                 |Please check the input UMI Read structure`${umi_read_structure}` invalid
                 |
