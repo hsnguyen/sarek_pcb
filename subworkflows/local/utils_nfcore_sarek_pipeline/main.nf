@@ -184,6 +184,7 @@ workflow PIPELINE_INITIALISATION {
         params.umi_in_read_header,
         params.umi_read_structure,
         params.wes,
+        params.mode,
     )
 
     emit:

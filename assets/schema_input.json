@@ -108,13 +108,6 @@
                 "type": "number",
                 "exists": true
             },
-            "pon_db": {
-                "type": "string",
-                "pattern": "^\\S+(;\\S+)*$",
-                "errorMessage": "Panel-of-normals types must be semicolon-separated values without spaces",
-                "description": "Panel-of-normals types requested for this normal sample.",
-                "meta": ["pon_db"]
-            },
             "vcf": {
                 "errorMessage": "VCF file for reads 1 cannot contain spaces, has to be a string, has to exist and must have extension '.vcf' or '.vcf.gz'",
                 "type": "string",

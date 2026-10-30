@@ -98,7 +98,6 @@ workflow FASTQ_PREPROCESS_GATK {
         } else {
             reads_for_fastp = input_fastq
         }
-
         // Trimming and/or splitting
         if (params.trim_fastq || params.split_fastq > 0 || params.umi_location) {
 
@@ -110,10 +109,8 @@ workflow FASTQ_PREPROCESS_GATK {
                 save_trimmed_fail,
                 save_merged
             )
-
             reports = reports.mix(FASTP.out.json.collect{ _meta, json -> json })
             reports = reports.mix(FASTP.out.html.collect{ _meta, html -> html })
-
             if (params.split_fastq) {
                 reads_for_bbsplit = FASTP.out.reads.map{ meta, reads ->
                     def read_files = reads.sort(false) { a,b -> a.getName().tokenize('.')[0] <=> b.getName().tokenize('.')[0] }.collate(2)
@@ -124,7 +121,6 @@ workflow FASTQ_PREPROCESS_GATK {
         } else {
             reads_for_bbsplit = reads_for_fastp
         }
-
         //
         // MODULE: Remove genome contaminant reads
         //
@@ -150,7 +146,7 @@ workflow FASTQ_PREPROCESS_GATK {
         // This is needed to group reads from the same sample together using groupKey to avoid stalling the workflow
         // when reads from different samples are mixed together
         reads_grouping_key = reads_for_alignment.map { meta, reads ->
-                [ meta.subMap('patient', 'sample', 'sex', 'status', 'pon_db'), reads ]
+                [ meta.subMap('patient', 'sample', 'sex', 'status'), reads ]
             }
             .groupTuple()
             .map { meta, reads ->
@@ -162,7 +158,6 @@ workflow FASTQ_PREPROCESS_GATK {
             if (meta.size * meta.num_lanes == 1) [ meta + [ id:meta.sample ], reads ]
             else [ meta, reads ]
         }
-
         // reads will be sorted
         sort_bam = true
         FASTQ_ALIGN(reads_for_alignment, index_alignment, sort_bam, fasta, fasta_fai)

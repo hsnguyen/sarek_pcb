@@ -86,7 +86,7 @@ include { samplesheetToList } from 'plugin/nf-schema'
 */
 
 // WORKFLOW: Run main nf-core/sarek analysis pipeline
-workflow NFCORE_SAREK {
+workflow NFCORE_PCBOMICS {
     take:
     samplesheet
 
@@ -334,7 +334,7 @@ workflow NFCORE_SAREK {
             ch_snpsift_db,
         )
     }
-    else {
+    else if(params.mode == 'panels'){
         PANELS_CREATION(
             samplesheet,
             params.aligner,
@@ -399,6 +399,10 @@ workflow NFCORE_SAREK {
             ch_snpsift_db,
         )
     }
+    else {
+        error("Mode {params.mode} is not recognized or supported at the moment.")
+    
+    }
 
     emit:
     multiqc_publish = params.mode == 'sarek' ? SAREK.out.multiqc_publish : PANELS_CREATION.out.multiqc_publish
@@ -430,7 +434,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_SAREK(PIPELINE_INITIALISATION.out.samplesheet)
+    NFCORE_PCBOMICS(PIPELINE_INITIALISATION.out.samplesheet)
 
     //
     // SUBWORKFLOW: Run completion tasks
@@ -441,11 +445,11 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        NFCORE_SAREK.out.multiqc_report,
+        NFCORE_PCBOMICS.out.multiqc_report,
     )
 
     publish:
-    multiqc = NFCORE_SAREK.out.multiqc_publish
+    multiqc = NFCORE_PCBOMICS.out.multiqc_publish
 }
 
 output {

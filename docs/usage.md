@@ -95,7 +95,6 @@ Output from Variant Calling and/or Annotation will be in a specific directory fo
 | `cram`     | Full path to CRAM file                                                                                                                                                                                                                                                                                                            |
 | `crai`     | Full path to CRAM index file                                                                                                                                                                                                                                                                                                      |
 | `table`    | Full path to recalibration table file                                                                                                                                                                                                                                                                                             |
-| `pon_db`   | Semicolon-separated panel types to create from this normal sample. Only valid for `status` `0`; supported values are `mutect2`, `cnvkit`, and `purecn`. |
 | `vcf`      | Full path to vcf file                                                                                                                                                                                                                                                                                                             |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
@@ -908,23 +907,17 @@ In particular, in cloud computing setting it is often advisable to reduce the nu
 
 ## How to create a panel-of-normals for Mutect2
 
-Use `--mode panels` to create panels of normals. Add an optional `pon_db`
-column to normal (`status` `0`) samples in the samplesheet. Its value lists
-requested panel types separated by semicolons. `mutect2` creates a Mutect2
-panel, `cnvkit` creates a cohort CNVkit reference, and `purecn` creates a
+Use `--mode panels` to create panels of normals for:
+`mutect2` GATK Mutect2 panel, `cnvkit` a cohort CNVkit reference, and `purecn` a
 PureCN NormalDB from all selected normal samples.
 
 ```csv
-patient,sample,status,lane,fastq_1,fastq_2,pon_db
-pon1,normal1,0,L001,normal1_R1.fastq.gz,normal1_R2.fastq.gz,mutect2
-pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz,mutect2;cnvkit;purecn
+patient,sample,status,lane,fastq_1,fastq_2
+pon1,normal1,0,L001,normal1_R1.fastq.gz,normal1_R2.fastq.gz
+pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz
 ```
 
-`pon_db` is independent of `--mutect2_pon`: the samplesheet column selects
-panels to create, whereas `--mutect2_pon` supplies an existing PON VCF to
-Mutect2 for somatic variant calling. PureCN uses `--purecn_assay` and
-`--purecn_genome`, which defaults to the selected genome. A panel type may
-only be assigned to normal samples.
+Only normal samples are used to create the PoNs.
 
 ## How to use varlociraptor
 

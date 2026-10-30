@@ -182,13 +182,11 @@ workflow SAREK {
             fasta_fai,
             interleave_input,
         )
-
         // Gather fastq (inputed or converted)
         // Theorically this could work on mixed input (fastq for one sample and bam for another)
         // But not sure how to handle that with the samplesheet
         // Or if we really want users to be able to do that
         input_fastq = fastq_gz.mix(CONVERT_FASTQ_INPUT.out.reads).mix(one_fastq_gz_from_spring).mix(two_fastq_gz_from_spring)
-
         // QC
         // `--skip_tools fastqc` to skip fastqc
         if (!(skip_tools.split(',').contains('fastqc'))) {
@@ -241,7 +239,6 @@ workflow SAREK {
                 bbsplit_index,
                 params.save_output_as_bam,
             )
-
             // Gather preprocessing output
             cram_variant_calling = channel.empty()
             cram_variant_calling = cram_variant_calling.mix(FASTQ_PREPROCESS_GATK.out.cram_variant_calling)
@@ -621,7 +618,7 @@ workflow SAREK {
     )
 
     emit:
-    cram_variant_calling = cram_variant_calling
+    cram_variant_calling //of normal samples for PoN building
     multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     multiqc_publish = MULTIQC.out.data.mix(MULTIQC.out.plots, MULTIQC.out.report)
 }
@@ -687,14 +684,14 @@ def readFirstLineOfFastq(path) {
     def line = null
     try {
         path.withInputStream { stream ->
-            def gzipStream: InputStream = new java.util.zip.GZIPInputStream(stream)
-            def decoder: Reader = new InputStreamReader(gzipStream, 'ASCII')
-            def buffered: BufferedReader = new BufferedReader(decoder)
+            def InputStream gzipStream = new java.util.zip.GZIPInputStream(stream)
+            def Reader decoder = new InputStreamReader(gzipStream, 'ASCII')
+            def BufferedReader buffered = new BufferedReader(decoder)
             line = buffered.readLine()
             assert line.startsWith('@')
         }
     }
-    catch (e: Exception) {
+    catch (Exception e) {
         log.warn("FASTQ file(${path}): Error streaming")
         log.warn("${e.message}")
     }

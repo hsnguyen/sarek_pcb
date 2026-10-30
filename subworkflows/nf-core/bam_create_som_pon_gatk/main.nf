@@ -81,7 +81,7 @@ workflow BAM_CREATE_SOM_PON_GATK {
         .map { meta, vcf, tbi -> [meta.pon_workspace, vcf, tbi] }
         .groupTuple()
         .map { pon_workspace, vcfs, tbis ->
-            def pon_workspace_path: java.nio.file.Path = file(pon_workspace).toAbsolutePath()
+            def java.nio.file.Path pon_workspace_path = file(pon_workspace).toAbsolutePath()
             [
                 [
                     id: pon_workspace_path.parent.fileName.toString(),

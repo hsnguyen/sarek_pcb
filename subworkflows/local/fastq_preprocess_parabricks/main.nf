@@ -21,7 +21,7 @@ workflow FASTQ_PREPROCESS_PARABRICKS {
     ch_reports  = channel.empty()
 
     reads_grouping_key = ch_reads.map { meta, reads ->
-            [ meta.subMap('patient', 'sample', 'sex', 'status', 'pon_db'), reads ]
+            [ meta.subMap('patient', 'sample', 'sex', 'status'), reads ]
         }
         .groupTuple()
         .map { meta, reads ->
