@@ -72,7 +72,6 @@ workflow PANELS_CREATION {
 
     main:
     ch_normal_samples_for_panels = input_sample.filter { sample -> sample[0].status == 0 }
-    ch_panel_requests_by_id = ch_normal_samples_for_panels.map { sample -> [sample[0].id, sample[0]] }
     //call sarek but just for reads pre-processing and alignment here
     SAREK(
         ch_normal_samples_for_panels,
@@ -138,57 +137,37 @@ workflow PANELS_CREATION {
         vep_species,
         snpsift_db,
     )
-    SAREK.out.cram_variant_calling.view()
-    ch_panel_alignments = SAREK.out.cram_variant_calling
-        .map { meta, alignment, index -> [meta.id, meta, alignment, index] }
-        .join(ch_panel_requests_by_id, failOnDuplicate: true, failOnMismatch: true)
-        .map { _id, meta, alignment, index, request_meta ->
-            [meta , alignment, index]
-        }
-    ch_panel_alignments.view()
+    ch_panel_alignments_cram = SAREK.out.cram_variant_calling_status_normal
+    //1. Build PoN for GATK mutect2
+    BAM_CREATE_SOM_PON_GATK(
+        ch_panel_alignments_cram,
+        fasta,
+        fasta_fai.map { meta, fai -> [meta, fai, []] },
+        dict,
+        'pcb_mutect2',
+        intervals_bed_combined_for_variant_calling,
+        intervals_and_num_intervals,
+    )
 
-//    ch_panel_alignments_by_format = ch_panel_alignments.branch { _meta, alignment, _index ->
-//        bam: alignment.toString().endsWith('.bam')
-//        cram: alignment.toString().endsWith('.cram')
-//    }
-//    //ch_panel_alignments_by_format.view()
-//
-//    SAMTOOLS_VIEW(
-//        ch_panel_alignments_by_format.cram,
-//        fasta.combine(fasta_fai).map { meta, fasta_file, _meta_fai, fai -> [meta, fasta_file, fai] }.collect(),
-//        [[:], []],
-//        [[:], []],
-//        'bai',
-//    )
-//
-//    ch_panel_bam = ch_panel_alignments_by_format.bam.mix(SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_VIEW.out.bai, failOnDuplicate: true, failOnMismatch: true))
-//
-//    ch_mutect2_pon_input = ch_panel_alignments
-//        .map { meta, cram, crai ->
-//            [
-//                meta + [pon_type: 'mutect2', pon_workspace: "${params.outdir}/pon/mutect2/mutect2"],
-//                cram,
-//                crai,
-//            ]
-//        }
-//
-//    BAM_CREATE_SOM_PON_GATK(
-//        ch_mutect2_pon_input,
-//        fasta,
-//        fasta_fai.map { meta, fai, _gzi -> [meta, fai, []] },
-//        dict,
-//        intervals_bed_combined_for_variant_calling,
-//        intervals_and_num_intervals,
-//    )
-//
-//    CNVKIT_BATCH(
-//        ch_panel_bam.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
-//        fasta.map { meta, fasta_file -> [meta, fasta_file, []] },
-//        intervals_bed_combined.map { bed -> [[id: 'cnvkit'], bed] },
-//        [[:], []],
-//        true,
-//    )
-//
+    //2. Build PoN for cnvkit
+    //need BAM input
+    SAMTOOLS_VIEW(
+        ch_panel_alignments_cram,
+        fasta.combine(fasta_fai).map { meta, fasta_file, _meta_fai, fai -> [meta, fasta_file, fai] }.collect(),
+        [[:], []],
+        [[:], []],
+        'bai',
+    )
+    ch_panel_alignments_bam = Channel.empty().mix(SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_VIEW.out.bai, failOnDuplicate: true, failOnMismatch: true))
+        
+    CNVKIT_BATCH(
+        ch_panel_alignments_bam.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
+        fasta.map { meta, fasta_file -> [meta, fasta_file, []] },
+        intervals_bed_combined.map { bed -> [[id: 'cnvkit'], bed] },
+        [[:], []],
+        true,
+      )
+
 //    PURECN_INTERVALFILE(
 //        intervals_bed_combined.map { bed -> [[id: 'purecn'], bed] },
 //        fasta,
@@ -210,8 +189,7 @@ workflow PANELS_CREATION {
     multiqc_publish = SAREK.out.multiqc_publish
     multiqc_report = SAREK.out.multiqc_report
 //    cnvkit_pon = CNVKIT_BATCH.out.cnn
-//   mutect2_pon = BAM_CREATE_SOM_PON_GATK.out.pon_vcf
+//    mutect2_pon = BAM_CREATE_SOM_PON_GATK.out.pon_vcf
 //    mutect2_pon_tbi = BAM_CREATE_SOM_PON_GATK.out.pon_index
 //   purecn_normaldb = PURECN_NORMALDB.out.rds
 }
-

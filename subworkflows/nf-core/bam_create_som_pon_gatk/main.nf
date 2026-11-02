@@ -1,12 +1,15 @@
+// Copyright (c) the nf-core community under an open-source MIT license.
+// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+
 //
 // Run GATK mutect2, genomicsdbimport and createsomaticpanelofnormals
 //
 
 include { GATK4_CREATESOMATICPANELOFNORMALS } from '../../../modules/nf-core/gatk4/createsomaticpanelofnormals'
-include { GATK4_GENOMICSDBIMPORT } from '../../../modules/nf-core/gatk4/genomicsdbimport'
-include { GATK4_MERGEMUTECTSTATS } from '../../../modules/nf-core/gatk4/mergemutectstats'
-include { GATK4_MERGEVCFS } from '../../../modules/nf-core/gatk4/mergevcfs'
-include { GATK4_MUTECT2 } from '../../../modules/nf-core/gatk4/mutect2'
+include { GATK4_GENOMICSDBIMPORT            } from '../../../modules/nf-core/gatk4/genomicsdbimport'
+include { GATK4_MERGEMUTECTSTATS            } from '../../../modules/nf-core/gatk4/mergemutectstats'
+include { GATK4_MERGEVCFS                   } from '../../../modules/nf-core/gatk4/mergevcfs'
+include { GATK4_MUTECT2                     } from '../../../modules/nf-core/gatk4/mutect2'
 
 workflow BAM_CREATE_SOM_PON_GATK {
     take:
@@ -14,6 +17,7 @@ workflow BAM_CREATE_SOM_PON_GATK {
     ch_fasta // channel: [ val(meta), path(fasta) ]
     ch_fai // channel: [ val(meta), path(fai), path(gzi) ]
     ch_dict // channel: [ val(meta), path(dict) ]
+    val_pon_norm // string:  name for panel of normals
     ch_intervals_gendb // channel: [ path(interval_file) ]
     ch_intervals_num // channel: [ path(intervals), val(num_intervals) ] or [ [], 0 ] if no intervals
 
@@ -76,52 +80,29 @@ workflow BAM_CREATE_SOM_PON_GATK {
         .mix(GATK4_MERGEMUTECTSTATS.out.stats)
         .map { meta, stats -> [meta - meta.subMap('num_intervals'), stats] }
 
-    ch_gendb_input = ch_vcf
-        .join(ch_tbi, failOnDuplicate: true, failOnMismatch: true)
-        .map { meta, vcf, tbi -> [meta.pon_workspace, vcf, tbi] }
-        .groupTuple()
-        .map { pon_workspace, vcfs, tbis ->
-            def java.nio.file.Path pon_workspace_path = file(pon_workspace).toAbsolutePath()
-            [
-                [
-                    id: pon_workspace_path.parent.fileName.toString(),
-                    pon_workspace: pon_workspace_path.toString(),
-                    pon_workspace_exists: pon_workspace_path.exists(),
-                    pon_workspace_parent: pon_workspace_path.parent.toString(),
-                ],
-                vcfs,
-                tbis,
-            ]
-        }
+    ch_gendb_input = channel.of([id: val_pon_norm])
+        .combine(ch_vcf.collect { _meta, vcf -> [vcf] }.toList())
+        .combine(ch_tbi.collect { _meta, tbi -> [tbi] }.toList())
         .combine(ch_intervals_gendb)
         .combine(ch_dict.map { _meta, dict -> [dict] })
-        .map { meta, vcf, tbi, interval, dict ->
-            [
-                meta,
-                vcf,
-                tbi,
-                interval,
-                meta.pon_workspace_exists ? file(meta.pon_workspace, checkIfExists: true) : [],
-                dict,
-            ]
-        }
+        .map { meta, vcf, tbi, interval, dict -> [meta, vcf, tbi, interval, [], dict] }
 
+    // Convert all sample vcfs into a genomicsdb workspace using genomicsdbimport
     GATK4_GENOMICSDBIMPORT(
         ch_gendb_input,
         false,
-        ch_gendb_input.map { meta, _vcf, _tbi, _interval, _workspace, _dict -> meta.pon_workspace_exists },
+        false,
         false,
     )
 
     // Create PON from the genomicsdb workspace using createsomaticpanelofnormals
-    genomicsdb = GATK4_GENOMICSDBIMPORT.out.genomicsdb.mix(GATK4_GENOMICSDBIMPORT.out.updatedb)
-    GATK4_CREATESOMATICPANELOFNORMALS(genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> tuple(meta, fai) }, ch_dict)
+    GATK4_CREATESOMATICPANELOFNORMALS(GATK4_GENOMICSDBIMPORT.out.genomicsdb, ch_fasta, ch_fai.map { meta, fai, _gzi -> [meta, fai] }, ch_dict)
 
     emit:
-    genomicsdb // channel: [ val(meta), path(genomicsdb) ]
+    genomicsdb    = GATK4_GENOMICSDBIMPORT.out.genomicsdb // channel: [ val(meta), path(genomicsdb) ]
     mutect2_index = ch_tbi // channel: [ val(meta), path(tbi) ]
     mutect2_stats = ch_stats // channel: [ val(meta), path(stats) ]
-    mutect2_vcf = ch_vcf // channel: [ val(meta), path(vcf) ]
-    pon_index = GATK4_CREATESOMATICPANELOFNORMALS.out.tbi // channel: [ val(meta), path(tbi) ]
-    pon_vcf = GATK4_CREATESOMATICPANELOFNORMALS.out.vcf // channel: [ val(meta), path(vcf) ]
+    mutect2_vcf   = ch_vcf // channel: [ val(meta), path(vcf) ]
+    pon_index     = GATK4_CREATESOMATICPANELOFNORMALS.out.tbi // channel: [ val(meta), path(tbi) ]
+    pon_vcf       = GATK4_CREATESOMATICPANELOFNORMALS.out.vcf // channel: [ val(meta), path(vcf) ]
 }

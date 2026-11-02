@@ -618,7 +618,8 @@ workflow SAREK {
     )
 
     emit:
-    cram_variant_calling //of normal samples for PoN building
+    cram_variant_calling_status_normal//for PoN
+    bam_variant_calling_status_normal //for PoN
     multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     multiqc_publish = MULTIQC.out.data.mix(MULTIQC.out.plots, MULTIQC.out.report)
 }
