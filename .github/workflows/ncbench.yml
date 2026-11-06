@@ -36,25 +36,25 @@ jobs:
 
           nextflow inspect -profile test_full_germline_ncbench_agilent . --outdir ./inspect >> inspect.json
 
-          FASTP_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:FASTP") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          FASTP_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:FASTP") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "FASTP_VERSION=${FASTP_VERSION}" >> $GITHUB_ENV
 
-          BWA_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:PREPARE_GENOME:BWAMEM1_INDEX") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          BWA_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:PREPARE_GENOME:BWAMEM1_INDEX") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "BWA_VERSION=${BWA_VERSION}" >> $GITHUB_ENV
 
-          BQSR_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:BAM_BASERECALIBRATOR:GATK4_BASERECALIBRATOR") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          BQSR_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:BAM_BASERECALIBRATOR:GATK4_BASERECALIBRATOR") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "BQSR_VERSION=${BQSR_VERSION}" >> $GITHUB_ENV
 
-          DEEPVARIANT_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_DEEPVARIANT:DEEPVARIANT") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          DEEPVARIANT_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_DEEPVARIANT:DEEPVARIANT") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "DEEPVARIANT_VERSION=${DEEPVARIANT_VERSION}" >> $GITHUB_ENV
 
-          FREEBAYES_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_FREEBAYES:FREEBAYES") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          FREEBAYES_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:BAM_VARIANT_CALLING_SOMATIC_ALL:BAM_VARIANT_CALLING_FREEBAYES:FREEBAYES") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "FREEBAYES_VERSION=${FREEBAYES_VERSION}" >> $GITHUB_ENV
 
-          HAPLOTYPECALLER_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_HAPLOTYPECALLER:GATK4_HAPLOTYPECALLER") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          HAPLOTYPECALLER_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_HAPLOTYPECALLER:GATK4_HAPLOTYPECALLER") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "HAPLOTYPECALLER_VERSION=${HAPLOTYPECALLER_VERSION}" >> $GITHUB_ENV
 
-          STRELKA_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_SAREK:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_SINGLE_STRELKA:STRELKA_SINGLE") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
+          STRELKA_VERSION=$(jq -r '.processes[] | select(.name == "NFCORE_PCBOMICS:SAREK:BAM_VARIANT_CALLING_GERMLINE_ALL:BAM_VARIANT_CALLING_SINGLE_STRELKA:STRELKA_SINGLE") | .container' inspect.json | awk -F':' '{print $NF}'  | cut -d "-" -f 1)
           echo "STRELKA_VERSION=${STRELKA_VERSION}" >> $GITHUB_ENV
 
       - name: Download files from AWS

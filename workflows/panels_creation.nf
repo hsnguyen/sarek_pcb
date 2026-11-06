@@ -3,7 +3,9 @@ include { CNVKIT_BATCH } from '../modules/nf-core/cnvkit/batch'
 include { PURECN_COVERAGE } from '../modules/nf-core/purecn/coverage'
 include { PURECN_INTERVALFILE } from '../modules/nf-core/purecn/intervalfile'
 include { PURECN_NORMALDB } from '../modules/nf-core/purecn/normaldb'
-include { SAMTOOLS_VIEW } from '../modules/nf-core/samtools/view'
+//include { SAMTOOLS_VIEW } from '../modules/nf-core/samtools/view'
+// CRAM_TO_BAM conversion
+include { SAMTOOLS_CONVERT as CRAM_TO_BAM } from '../modules/nf-core/samtools/convert'
 include { SAREK } from './sarek'
 
 workflow PANELS_CREATION {
@@ -137,7 +139,7 @@ workflow PANELS_CREATION {
         vep_species,
         snpsift_db,
     )
-    ch_panel_alignments_cram = SAREK.out.cram_variant_calling_status_normal
+    ch_panel_alignments_cram = SAREK.out.cram_variant_calling
     //1. Build PoN for GATK mutect2
     BAM_CREATE_SOM_PON_GATK(
         ch_panel_alignments_cram,
@@ -149,17 +151,25 @@ workflow PANELS_CREATION {
         intervals_and_num_intervals,
     )
 
-    //2. Build PoN for cnvkit
-    //need BAM input
-    SAMTOOLS_VIEW(
-        ch_panel_alignments_cram,
-        fasta.combine(fasta_fai).map { meta, fasta_file, _meta_fai, fai -> [meta, fasta_file, fai] }.collect(),
-        [[:], []],
-        [[:], []],
-        'bai',
-    )
-    ch_panel_alignments_bam = Channel.empty().mix(SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_VIEW.out.bai, failOnDuplicate: true, failOnMismatch: true))
-        
+    //2. Build PoN for cnvkit: need BAM input!!!
+    // Below is piece of code copied from sarek.nf since don't want to change it:
+    // Differentiate between bam and cram files
+    cram_variant_calling_status_tmp = ch_panel_alignments_cram.branch { _meta, file, _index ->
+        bam: file.toString().endsWith('.bam')
+        cram: file.toString().endsWith('.cram')
+    }
+
+    // convert cram files
+    CRAM_TO_BAM(cram_variant_calling_status_tmp.cram, fasta.combine(fasta_fai).map { meta, fasta_, _meta_fai, fai -> [meta, fasta_, fai] }.collect())
+
+    // gather all bam files
+    ch_panel_alignments_bam = CRAM_TO_BAM.out.bam
+        .join(CRAM_TO_BAM.out.bai, by: [0])
+        .mix(cram_variant_calling_status_tmp.bam)
+        .map { meta, bam, bai ->
+            [meta + [data_type: 'bam'], bam, bai]
+    }
+
     CNVKIT_BATCH(
         ch_panel_alignments_bam.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
         fasta.map { meta, fasta_file -> [meta, fasta_file, []] },
@@ -168,22 +178,30 @@ workflow PANELS_CREATION {
         true,
       )
 
-//    PURECN_INTERVALFILE(
-//        intervals_bed_combined.map { bed -> [[id: 'purecn'], bed] },
-//        fasta,
-//        params.purecn_genome ?: params.ascat_genome,
-//    )
-//
-//    PURECN_COVERAGE(
-//        ch_panel_bam,
-//        PURECN_INTERVALFILE.out.txt.collect(),
-//    )
-//
-//    PURECN_NORMALDB(
-//        PURECN_COVERAGE.out.txt.collect().map { coverage_files -> [[id: 'purecn'], coverage_files, [], []] },
-//        params.purecn_genome ?: params.ascat_genome,
-//        params.purecn_assay,
-//    )
+    //3. Build PoN for purecn
+    PURECN_INTERVALFILE(
+        intervals_bed_combined.map { bed -> [[id: 'purecn_intervals'], bed] },
+        fasta,
+        params.purecn_genome ?: 'hg38',
+    )
+    
+    PURECN_COVERAGE(
+        //ch_panel_alignments_bam.map { _meta, bam, bai -> [[id: _meta.id], bam, bai] },
+        ch_panel_alignments_bam,
+        PURECN_INTERVALFILE.out.txt.collect{ it[1] },
+    )
+
+    ch_purecn_normaldb = PURECN_COVERAGE.out.txt.collect{ it[1] }.map { coverage_files -> [[id: 'purecn_normaldb'], coverage_files] }
+        .combine(BAM_CREATE_SOM_PON_GATK.out.genomicsdb.collect { _meta, gdb -> [gdb] }.toList())
+        .map { meta, cov, gdb -> [meta, cov, gdb, []]}
+        //.combine(BAM_CREATE_SOM_PON_GATK.out.pon_vcf.collect {_meta, vcf -> [vcf] }.toList())
+        //.combine(BAM_CREATE_SOM_PON_GATK.out.pon_index.collect {_meta, tbi -> [tbi] }.toList())
+        //.map { meta, cov, vcf, tbi -> [meta, cov, vcf, tbi] }
+    PURECN_NORMALDB(
+        ch_purecn_normaldb,
+        params.purecn_genome ?: 'hg38',
+        params.purecn_assay ?: 'pcb_wes',
+    )
 
     emit:
     multiqc_publish = SAREK.out.multiqc_publish

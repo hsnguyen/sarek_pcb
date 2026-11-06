@@ -6,8 +6,8 @@
 analysis of whole-genome, exome, and targeted sequencing data.
 
 - `main.nf` is the entry point: it resolves genome attributes, runs pipeline
-  initialization and completion utilities, and invokes `NFCORE_SAREK`.
-- `NFCORE_SAREK` prepares references, intervals, optional annotation caches,
+  initialization and completion utilities, and invokes `NFCORE_PCBOMICS`.
+- `NFCORE_PCBOMICS` prepares references, intervals, optional annotation caches,
   and SnpSift databases before passing channels to `workflows/sarek/main.nf`.
 - `workflows/sarek/main.nf` dispatches input by type, performs preprocessing,
   separates normal, tumor-only, and matched tumor/normal paths, invokes the
