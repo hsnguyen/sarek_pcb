@@ -3,7 +3,7 @@ include { CNVKIT_BATCH } from '../modules/nf-core/cnvkit/batch'
 include { PURECN_COVERAGE } from '../modules/nf-core/purecn/coverage'
 include { PURECN_INTERVALFILE } from '../modules/nf-core/purecn/intervalfile'
 include { PURECN_NORMALDB } from '../modules/nf-core/purecn/normaldb'
-//include { SAMTOOLS_VIEW } from '../modules/nf-core/samtools/view'
+include { BCFTOOLS_MERGE } from '../modules/nf-core/bcftools/merge'
 // CRAM_TO_BAM conversion
 include { SAMTOOLS_CONVERT as CRAM_TO_BAM } from '../modules/nf-core/samtools/convert'
 include { SAREK } from './sarek'
@@ -171,7 +171,8 @@ workflow PANELS_CREATION {
     }
 
     CNVKIT_BATCH(
-        ch_panel_alignments_bam.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
+        //ch_panel_alignments_bam.map { _meta, bam, _bai -> [[id: 'cnvkit'], bam] }.groupTuple().map { meta, bams -> [meta, [], [], bams, []] },
+        ch_panel_alignments_bam.map { _meta, bam, bai -> [[id: 'cnvkit'], bam, bai] }.groupTuple().map { meta, bams, bais -> [meta, [], [], bams, bais] },
         fasta.map { meta, fasta_file -> [meta, fasta_file, []] },
         intervals_bed_combined.map { bed -> [[id: 'cnvkit'], bed] },
         [[:], []],
@@ -190,13 +191,24 @@ workflow PANELS_CREATION {
         ch_panel_alignments_bam,
         PURECN_INTERVALFILE.out.txt.collect{ it[1] },
     )
-
-    ch_purecn_normaldb = PURECN_COVERAGE.out.txt.collect{ it[1] }.map { coverage_files -> [[id: 'purecn_normaldb'], coverage_files] }
-        .combine(BAM_CREATE_SOM_PON_GATK.out.genomicsdb.collect { _meta, gdb -> [gdb] }.toList())
-        .map { meta, cov, gdb -> [meta, cov, gdb, []]}
-        //.combine(BAM_CREATE_SOM_PON_GATK.out.pon_vcf.collect {_meta, vcf -> [vcf] }.toList())
-        //.combine(BAM_CREATE_SOM_PON_GATK.out.pon_index.collect {_meta, tbi -> [tbi] }.toList())
-        //.map { meta, cov, vcf, tbi -> [meta, cov, vcf, tbi] }
+   
+    ch_vcf_merge = channel.of([id: 'merge_mutect2_vcf'])
+        .combine(BAM_CREATE_SOM_PON_GATK.out.mutect2_vcf.collect {_meta, vcf -> [vcf] }.toList()) 
+        .combine(BAM_CREATE_SOM_PON_GATK.out.mutect2_index.collect {_meta, tbi -> [tbi] }.toList()) 
+        .combine(intervals_bed_combined)
+        .map { meta, vcfs, tbis, bed -> [meta, vcfs, tbis, bed] }.collect()
+    ch_vcf_merge.view()
+    
+    BCFTOOLS_MERGE(
+        ch_vcf_merge,
+        fasta.combine(fasta_fai).map { meta, fasta_, _meta_fai, fai -> [meta, fasta_, fai] }.collect() 
+    )
+    ch_purecn_normaldb = PURECN_COVERAGE.out.loess_txt.collect{ it[1] }.map { coverage_files -> [[id: 'purecn_normaldb'], coverage_files] }
+        .combine(BCFTOOLS_MERGE.out.vcf.collect {_meta, vcf -> [vcf] }.toList())
+        .combine(BCFTOOLS_MERGE.out.index.collect {_meta, tbi -> [tbi] }.toList())
+        .map { meta, cov, vcf, tbi -> [meta, cov, vcf, tbi] }
+    
+    //ch_purecn_normaldb.view()
     PURECN_NORMALDB(
         ch_purecn_normaldb,
         params.purecn_genome ?: 'hg38',
