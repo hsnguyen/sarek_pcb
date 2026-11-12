@@ -518,6 +518,18 @@ It is not required, but recommended to have a [panel of normals (PON)](https://g
 
 </details>
 
+### PureCN purity estimation
+
+**Output directory: `{outdir}/purity/<sample>/`**
+
+- `<sample>.csv`
+  - Tumour purity, ploidy, and quality flags.
+- `<sample>_dnacopy.seg`
+  - Copy-number segmentation.
+- `<sample>.pdf` and `<sample>_local_optima.pdf`
+  - Copy-number and purity optimisation plots.
+- Optional variant, loss-of-heterozygosity, gene-level copy-number, and segmentation files.
+
 <details markdown="1">
 <summary>Output files for tumor-only and tumor/normal paired samples</summary>
 

@@ -121,6 +121,9 @@ workflow SAMPLESHEET_TO_CHANNEL {
             if (contamination) {
                 meta = meta + [contamination: contamination]
             }
+            if (mode == 'purity' && vcf) {
+                meta = meta + [vcf: vcf]
+            }
             if ((meta.lane || meta.lane == 0) && fastq_2) {
                 // mapping from fastq files
                 meta = meta + [id: "${meta.sample}-${meta.lane}".toString(), data_type: "fastq_gz", num_lanes: num_lanes.toInteger(), size: 1]
@@ -234,52 +237,58 @@ workflow SAMPLESHEET_TO_CHANNEL {
                 error("Missing or unknown field in csv file header. Please check your samplesheet")
             }
         }
-    // TODO: Check again when more modes are available
     if (mode == 'panels') {
         input_sample
             .filter { sample -> sample[0].status == 0 }
             .ifEmpty {
-                error('No normal samples found to create PoN!') 
+                error('No normal samples found to create PoN!')
+            }
+    }
+    else if (mode == 'purity') {
+        input_sample
+            .filter { sample -> sample[0].status == 1 }
+            .ifEmpty {
+                error('No tumour samples found for purity estimation.')
             }
     }
     else {
         if (step != 'annotate' && tools && !build_only_index) {
-        // Two checks for ensuring that the pipeline stops with a meaningful error message if
-        // 1. the sample-sheet only contains normal-samples, but some of the requested tools require tumor-samples, and
-        // 2. the sample-sheet only contains tumor-samples, but some of the requested tools require normal-samples.
-        input_sample
-            .filter { sample -> sample[0].status == 1 }
-            .ifEmpty {
-                // In this case, the sample-sheet contains no tumor-samples
-                if (!build_only_index) {
-                    def tools_tumor = ['ascat', 'controlfreec', 'mutect2', 'msisensorpro']
-                    def tools_tumor_asked = []
-                    tools_tumor.each { tool ->
-                        if (tools && tools.split(',').contains(tool)) {
-                            tools_tumor_asked.add(tool)
+            // Two checks for ensuring that the pipeline stops with a meaningful error message if
+            // 1. the sample-sheet only contains normal-samples, but some of the requested tools require tumor-samples, and
+            // 2. the sample-sheet only contains tumor-samples, but some of the requested tools require normal-samples.
+            input_sample
+                .filter { sample -> sample[0].status == 1 }
+                .ifEmpty {
+                    // In this case, the sample-sheet contains no tumor-samples
+                    if (!build_only_index) {
+                        def tools_tumor = ['ascat', 'controlfreec', 'mutect2', 'msisensorpro']
+                        def tools_tumor_asked = []
+                        tools_tumor.each { tool ->
+                            if (tools && tools.split(',').contains(tool)) {
+                                tools_tumor_asked.add(tool)
+                            }
+                        }
+                        if (!tools_tumor_asked.isEmpty()) {
+                            error('The sample-sheet only contains normal-samples, but the following tools, which were requested with "--tools", expect at least one tumor-sample : ' + tools_tumor_asked.join(", "))
                         }
                     }
-                    if (!tools_tumor_asked.isEmpty()) {
-                        error('The sample-sheet only contains normal-samples, but the following tools, which were requested with "--tools", expect at least one tumor-sample : ' + tools_tumor_asked.join(", "))
-                    }
                 }
-            }
 
-        input_sample
-            .filter { sample -> sample[0].status == 0 }
-            .ifEmpty {
-                // In this case, the sample-sheet contains no normal/germline-samples
-                def tools_requiring_normal_samples = ['ascat', 'deepvariant', 'haplotypecaller', 'msisensorpro']
-                def requested_tools_requiring_normal_samples = []
-                tools_requiring_normal_samples.each { tool_requiring_normal_samples ->
-                    if (tools && tools.split(',').contains(tool_requiring_normal_samples)) {
-                        requested_tools_requiring_normal_samples.add(tool_requiring_normal_samples)
+            input_sample
+                .filter { sample -> sample[0].status == 0 }
+                .ifEmpty {
+                    // In this case, the sample-sheet contains no normal/germline-samples
+                    def tools_requiring_normal_samples = ['ascat', 'deepvariant', 'haplotypecaller', 'msisensorpro']
+                    def requested_tools_requiring_normal_samples = []
+                    tools_requiring_normal_samples.each { tool_requiring_normal_samples ->
+                        if (tools && tools.split(',').contains(tool_requiring_normal_samples)) {
+                            requested_tools_requiring_normal_samples.add(tool_requiring_normal_samples)
+                        }
+                    }
+                    if (!requested_tools_requiring_normal_samples.isEmpty()) {
+                        error('The sample-sheet only contains tumor-samples, but the following tools, which were requested by the option "tools", expect at least one normal-sample : ' + requested_tools_requiring_normal_samples.join(", "))
                     }
                 }
-                if (!requested_tools_requiring_normal_samples.isEmpty()) {
-                    error('The sample-sheet only contains tumor-samples, but the following tools, which were requested by the option "tools", expect at least one normal-sample : ' + requested_tools_requiring_normal_samples.join(", "))
-                }
-            }
         }
 
         // Fails when wrong extension for intervals file
@@ -470,8 +479,8 @@ workflow SAMPLESHEET_TO_CHANNEL {
         if ((snpeff_cache && tools && (tools.split(',').contains("snpeff") || tools.split(',').contains('merge'))) && !snpeff_db) {
             error("Please specify --snpeff_db")
         }
-
     }
+
     emit:
     input_sample
 }

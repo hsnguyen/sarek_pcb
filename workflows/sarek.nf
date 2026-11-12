@@ -126,6 +126,8 @@ workflow SAREK {
     snpsift_db // channel: [[databases], [tbis], [vardbs], [fields], [prefixes]]
 
     main:
+    ch_mutect2_vcf = channel.empty()
+
     // To gather all QC reports for MultiQC
     reports = channel.empty()
 
@@ -533,6 +535,8 @@ workflow SAREK {
         // Gather vcf files for annotation and QC
         // POST_VARIANTCALLING always outputs VCFs - either processed or pass-through originals
         vcf_to_annotate = POST_VARIANTCALLING.out.vcfs
+        ch_mutect2_vcf = vcf_to_annotate
+            .filter { meta, _vcf -> meta.variantcaller == 'mutect2' }
 
         CHANNEL_VARIANT_CALLING_CREATE_CSV(vcf_to_annotate, params.outdir)
 
@@ -619,6 +623,7 @@ workflow SAREK {
 
     emit:
     cram_variant_calling//for PoN
+    mutect2_vcf = ch_mutect2_vcf
     multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     multiqc_publish = MULTIQC.out.data.mix(MULTIQC.out.plots, MULTIQC.out.report)
 }

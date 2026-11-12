@@ -919,6 +919,25 @@ pon2,normal2,0,L001,normal2_R1.fastq.gz,normal2_R2.fastq.gz
 
 Only normal samples are used to create the PoNs.
 
+## How to estimate tumour purity and ploidy with PureCN
+
+Use `--mode purity` after running `--mode panels` with PureCN. Provide tumour samples
+and their matching Mutect2 VCFs in the input samplesheet, alongside the PureCN NormalDB:
+
+```bash
+nextflow run . \
+    --mode purity \
+    --input tumour.csv \
+    --step variant_calling \
+    --purecn_normaldb panels/pon/purecn/normalDB_purecn_normaldb_hg38.rds \
+    --purecn_mapping_bias panels/pon/purecn/mapping_bias_purecn_normaldb_hg38.rds \
+    --outdir purity_results
+```
+
+Set the `vcf` column to the matching Mutect2 VCF for each tumour sample. If `vcf` is
+empty, purity mode runs Mutect2 through Sarek for that sample. `--purecn_mapping_bias`
+is optional.
+
 ## How to use varlociraptor
 
 You will need to add another column called `contamination` to the samplesheet for tumor-only or somatic variant calling. There you should add the fraction of contamination the tumor sample. This is `1 - purity` or `1- tumor_cell_content`. If you do not have access to that information for your samples put in a reasonable approximation by literature search for the tumor type you are working with.

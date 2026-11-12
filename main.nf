@@ -69,6 +69,7 @@ params.vep_species = getGenomeAttribute('vep_species')
 
 include { SAREK } from './workflows/sarek'
 include { PANELS_CREATION } from './workflows/panels_creation'
+include { PURITY } from './workflows/purity'
 include { PIPELINE_COMPLETION } from './subworkflows/local/utils_nfcore_sarek_pipeline'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sarek_pipeline'
 include { PREPARE_GENOME } from './subworkflows/local/prepare_genome'
@@ -334,7 +335,7 @@ workflow NFCORE_PCBOMICS {
             ch_snpsift_db,
         )
     }
-    else if(params.mode == 'panels'){
+    else if (params.mode == 'panels') {
         PANELS_CREATION(
             samplesheet,
             params.aligner,
@@ -399,14 +400,78 @@ workflow NFCORE_PCBOMICS {
             ch_snpsift_db,
         )
     }
+    else if (params.mode == 'purity') {
+        PURITY(
+            samplesheet,
+            params.aligner,
+            params.skip_tools ?: 'no_tools',
+            params.step,
+            PREPARE_GENOME.out.ascat_alleles,
+            PREPARE_GENOME.out.ascat_loci,
+            PREPARE_GENOME.out.ascat_loci_gc,
+            PREPARE_GENOME.out.ascat_loci_rt,
+            PREPARE_GENOME.out.bbsplit_index,
+            PREPARE_GENOME.out.bcftools_annotations,
+            PREPARE_GENOME.out.bcftools_annotations_tbi,
+            params.bcftools_columns ? channel.fromPath(params.bcftools_columns).collect() : channel.value([[]]),
+            params.bcftools_header_lines ? channel.fromPath(params.bcftools_header_lines).collect() : channel.empty(),
+            params.cf_chrom_len ? channel.fromPath(params.cf_chrom_len).collect() : [],
+            PREPARE_GENOME.out.chr_dir,
+            cnvkit_reference,
+            PREPARE_GENOME.out.dbsnp,
+            PREPARE_GENOME.out.dbsnp_tbi,
+            params.dbsnp_vqsr ? channel.value(params.dbsnp_vqsr) : channel.empty(),
+            PREPARE_GENOME.out.dict,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta_fai,
+            PREPARE_GENOME.out.germline_resource,
+            PREPARE_GENOME.out.germline_resource_tbi,
+            PREPARE_GENOME.out.index_alignment,
+            intervals_and_num_intervals,
+            intervals_bed_combined,
+            intervals_bed_combined_for_variant_calling,
+            intervals_bed_gz_tbi_and_num_intervals,
+            intervals_bed_gz_tbi_combined,
+            intervals_for_preprocessing,
+            params.known_indels_vqsr ? channel.value(params.known_indels_vqsr) : channel.empty(),
+            PREPARE_GENOME.out.known_sites_indels,
+            PREPARE_GENOME.out.known_sites_indels_tbi,
+            PREPARE_GENOME.out.known_sites_snps,
+            PREPARE_GENOME.out.known_sites_snps_tbi,
+            params.known_snps_vqsr ? channel.value(params.known_snps_vqsr) : channel.empty(),
+            params.mappability ? channel.fromPath(params.mappability).collect() : channel.value([]),
+            PREPARE_GENOME.out.msisensor2_models,
+            PREPARE_GENOME.out.msisensorpro_scan,
+            params.ngscheckmate_bed ? channel.value(params.ngscheckmate_bed) : channel.empty(),
+            PREPARE_GENOME.out.mutect2_pon,
+            PREPARE_GENOME.out.mutect2_pon_tbi,
+            params.sentieon_dnascope_model ? channel.fromPath(params.sentieon_dnascope_model).collect() : channel.value([]),
+            params.varlociraptor_chunk_size,
+            params.varlociraptor_events_germline,
+            params.varlociraptor_events_somatic,
+            params.varlociraptor_events_tumor_only,
+            params.varlociraptor_fdr,
+            params.varlociraptor_scenario_germline ? channel.fromPath(params.varlociraptor_scenario_germline).map { scenario -> [[id: scenario.baseName - '.yte'], scenario] }.collect() : channel.fromPath("${projectDir}/assets/varlociraptor_germline.yte.yaml").collect(),
+            params.varlociraptor_scenario_somatic ? channel.fromPath(params.varlociraptor_scenario_somatic).map { scenario -> [[id: scenario.baseName - '.yte'], scenario] }.collect() : channel.fromPath("${projectDir}/assets/varlociraptor_somatic.yte.yaml").collect(),
+            params.varlociraptor_scenario_tumor_only ? channel.fromPath(params.varlociraptor_scenario_tumor_only).map { scenario -> [[id: scenario.baseName - '.yte'], scenario] }.collect() : channel.fromPath("${projectDir}/assets/varlociraptor_tumor_only.yte.yaml").collect(),
+            snpeff_cache,
+            params.snpeff_db,
+            vep_cache,
+            params.vep_cache_version,
+            vep_extra_files,
+            PREPARE_GENOME.out.vep_fasta,
+            params.vep_genome,
+            params.vep_species,
+            ch_snpsift_db,
+        )
+    }
     else {
-        error("Mode {params.mode} is not recognized or supported at the moment.")
-    
+        error("Mode ${params.mode} is not recognized or supported.")
     }
 
     emit:
-    multiqc_publish = params.mode == 'sarek' ? SAREK.out.multiqc_publish : PANELS_CREATION.out.multiqc_publish
-    multiqc_report = params.mode == 'sarek' ? SAREK.out.multiqc_report : PANELS_CREATION.out.multiqc_report
+    multiqc_publish = params.mode == 'sarek' ? SAREK.out.multiqc_publish : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_publish : PURITY.out.multiqc_publish
+    multiqc_report = params.mode == 'sarek' ? SAREK.out.multiqc_report : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_report : PURITY.out.multiqc_report
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

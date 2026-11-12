@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - [#XXX](https://github.com/nf-core/sarek/pull/XXX) - Add `--mode panels` for Mutect2, CNVkit, and PureCN panel creation from normal samples
+- [#XXX](https://github.com/nf-core/sarek/pull/XXX) - Add `--mode purity` for PureCN tumour purity, ploidy, and copy-number estimation
 ## [3.10.0](https://github.com/nf-core/sarek/releases/tag/3.10.0) - Aktse
 
 Aktse is a mountain hut on the northern shore of Laitaure, on the Kungsleden trail at the edge of Sarek National Park.

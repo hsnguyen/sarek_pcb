@@ -440,6 +440,11 @@
                         "git_sha": "df08a57a95635610b7dc0ebbf6d3e1260b957bac",
                         "installed_by": ["modules"]
                     },
+                    "purecn/run": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "rbt/vcfsplit": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
