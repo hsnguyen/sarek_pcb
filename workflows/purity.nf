@@ -75,22 +75,22 @@ workflow PURITY {
     }
 
     ch_tumour_samples_for_purity = input_sample
-        .filter { meta, _input, _input_index -> meta.status == 1 }
+        .filter { sample -> sample[0].status == 1 }
         .ifEmpty {
             error('Purity mode requires at least one tumour sample.')
         }
 
     ch_tumour_with_vcf = ch_tumour_samples_for_purity
-        .filter { meta, _input, _input_index -> meta.vcf }
+        .filter { sample -> sample[0].vcf }
 
     ch_tumour_without_vcf = ch_tumour_samples_for_purity
-        .filter { meta, _input, _input_index -> !meta.vcf }
+        .filter { sample -> !sample[0].vcf }
 
     ch_vcf_from_samplesheet = ch_tumour_with_vcf
-        .map { meta, _input, _input_index -> [meta.id, meta.vcf] }
-
+        .map { sample -> [sample[0].id, sample[0].vcf] }
+   // VCF provided or not, run sarek to get the bam files for purecn_coverage 
     SAREK_NO_MUTECT2(
-        ch_tumour_with_vcf.map { meta, input, input_index -> [meta - meta.subMap('vcf'), input, input_index] },
+        ch_tumour_with_vcf,
         aligner,
         skip_tools,
         step,
@@ -153,7 +153,7 @@ workflow PURITY {
         vep_species,
         snpsift_db,
     )
-
+    //If VCF not provided, run sarek with specific mutect2 (--genotype-germline-sites true --genotype-pon-sites true)
     SAREK_MUTECT2(
         ch_tumour_without_vcf,
         aligner,
@@ -222,9 +222,9 @@ workflow PURITY {
     ch_sarek_for_purecn = SAREK_NO_MUTECT2.out.cram_variant_calling
         .mix(SAREK_MUTECT2.out.cram_variant_calling)
         .branch { _meta, alignment, _index ->
-        bam: alignment.toString().endsWith('.bam')
-        cram: alignment.toString().endsWith('.cram')
-    }
+            bam: alignment.toString().endsWith('.bam')
+            cram: alignment.toString().endsWith('.cram')
+        }
 
     CRAM_TO_BAM(
         ch_sarek_for_purecn.cram,
@@ -267,5 +267,5 @@ workflow PURITY {
     emit:
     multiqc_publish = channel.empty()
     multiqc_report = channel.empty()
-    purity = PURECN_RUN.out.csv
+//    purity = PURECN_RUN.out.csv
 }

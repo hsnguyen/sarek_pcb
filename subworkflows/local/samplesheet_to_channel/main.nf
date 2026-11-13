@@ -121,7 +121,7 @@ workflow SAMPLESHEET_TO_CHANNEL {
             if (contamination) {
                 meta = meta + [contamination: contamination]
             }
-            if (mode == 'purity' && vcf) {
+            if (mode == 'purity') {
                 meta = meta + [vcf: vcf]
             }
             if ((meta.lane || meta.lane == 0) && fastq_2) {
