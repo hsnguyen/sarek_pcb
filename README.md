@@ -1,14 +1,16 @@
 ## Introduction
 
 This is a workflow designed to work with genomics data at the [Perkins Cancer Biobank (PCB)](https://perkins.org.au/research/disease/cancer/cancer-biobank/). The pipeline is based on **nf-core/sarek**,  **nf-core/createpanelrefs**, as well as many other **nf-core** [subworkflows](https://nf-co.re/subworkflows) and [modules](https://nf-co.re/modules) to incorporate different analyses for Whole Exome Sequencing data analyses at PCB.
-
 **sarek_pcb** inherits almost everything from **nf-core/sarek** and integrated other relevant modules such as **Panels of Normal** construction, tumour purity estimation by **pureCN**, etc.
+
+It also includes **nf-core/rnaseq** and **nf-core/differentialabundance** for RNASeq data analysis. Not all tools are needed for our own business though.
 (More coming in the future...)
 
-<p align="center">
-    <img title="Sarek Workflow" src="docs/images/nf-core-sarek.png" width=30%>
-    <img title="RNASeq Workflow" src="docs/images/nf-core-rnaseq.png" width=30%>
-    <img title="RNASeq Workflow" src="docs/images/nf-core-differentialabundance.png" width=30%>
+
+<img align="left" title="Sarek Workflow" src="docs/images/nf-core-sarek.png" width=20%>
+<p align="right">
+    <img title="RNASeq Workflow" src="docs/images/nf-core-rnaseq.png" width=70%> 
+    <img title="DEA Workflow" src="docs/images/nf-core-differentialabundance.png" width=70%>
 </p>
 
 ## Pipeline summary
@@ -66,9 +68,6 @@ Maintenance is now lead by Friederike Hanssen (now at [Seqera](https://seqera.io
 
 ## Contributions & Support
 
-If you would like to contribute to this pipeline, please see the [contributing guidelines](docs/CONTRIBUTING.md).
-
-For further information or help, don't hesitate to get in touch on the [Slack `#sarek` channel](https://nfcore.slack.com/channels/sarek), or contact the dev team on the [Slack `#sarek_dev` channel](https://nfcore.slack.com/channels/sarek_dev). (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
 
