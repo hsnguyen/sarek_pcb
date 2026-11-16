@@ -32,11 +32,11 @@ ID1,S1,L002,ID1_S1_L002_R1_001.fastq.gz,ID1_S1_L002_R2_001.fastq.gz
 
 Each row represents a pair of fastq files (paired end).
 
-Now, you can run the pipeline using:
+Now, you can run the pipeline using PCB-specific Pawsey profile (pawsey1152):
 
 ```bash
 nextflow run main.nf \
-   -profile <docker/singularity/.../institute> \
+   -profile pawsey1152,singularity \
    --input samplesheet.csv \
    --outdir <OUTDIR>
 ```
@@ -46,12 +46,18 @@ nextflow run main.nf \
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/sarek/usage) and the [parameter documentation](https://nf-co.re/sarek/parameters).
 
-## Pipeline output
+## Pipeline modes
+Beside the default `sarek`, the pipeline provides options to run other workflows using the option `--mode`: 
+- [x] `--mode panels`: build panels of normal (PoN) for `GATK4 mutect2`, `cnvkit` and `pureCN`
+- [x] `--mode sarek`(default): run `sarek` pipeline for WES data
+- [x] `--mode purity`: run tumour purity estimation by `pureCN`
+- [ ] `--mode rnaseq`: run rnaseq analysis and reporting for RNASeq sequencing data
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/sarek/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/sarek/output).
-
+A natural approach to use this pipeline should be:
+1. Create PoNs by normal data (normal-only samplesheet, e.g. PBMC, as input)
+2. Run sarek for WES data, provided the PoNs created above (tumour/normal samples involved as input).
+3. If needed, run `pureCN` for tumour purity estimation (tumour-only or same samplesheet to run `sarek`)
+4. (TODO) Run RNASeq analysis, e.g. DE analysis, enrichment analysis and generate user-friendly reports (using an independent RNASeq data samplesheet as input).
 
 ## Credits
 
