@@ -11,6 +11,8 @@ Sarek is a workflow designed to detect germline and somatic variants on whole ge
 Initially designed for human and mouse, it can work on any species if a reference genome is available.
 Sarek is designed to handle single samples, such as single-normal or single-tumor samples, and tumor-normal pairs including additional relapses.
 
+The shared samplesheet supports DNA and RNA assays. Set `assay` to `dna` or `rna`; empty values default to `dna`. DNA modes (`sarek`, `panels`, and `purity`) process only DNA rows. RNA mode processes only RNA rows.
+
 # Running the pipeline
 
 ## Quickstart
@@ -86,6 +88,9 @@ Output from Variant Calling and/or Annotation will be in a specific directory fo
 | `status`   | **Normal/tumor status of sample**; can be `0` (normal) or `1` (tumor).<br /> _Optional, Default: `0`_                                                                                                                                                                                                                             |
 | `sample`   | **Custom sample ID** for each tumor and normal sample; more than one tumor sample for each subject is possible, i.e. a tumor and a relapse; samples can have multiple lanes for which the _same_ ID must be used to merge them later (see also `lane`). Sample IDs must be unique for unique biological samples <br /> _Required_ |
 | `lane`     | Lane ID, used when the `sample` is multiplexed on several lanes. Must be unique for each lane in the same sample (but does not need to be the original lane name), and must contain at least one character <br /> _Required for `--step mapping`_                                                                                 |
+| `assay`    | Assay type. Use `dna` for Sarek, panels, and purity modes, or `rna` for RNA-seq mode. <br /> _Optional, Default: `dna`_ |
+| `strandness` | RNA library strandness: `auto`, `forward`, or `reverse`. <br /> _Optional for RNA, Default: `auto`_ |
+| `seq_platform` | Sequencing platform metadata for RNA samples. <br /> _Optional for RNA, Default: `ILLUMINA`_ |
 | `fastq_1`  | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension `.fastq.gz` or `.fq.gz`.                                                                                                                                                                                                        |
 | `fastq_2`  | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension `.fastq.gz` or `.fq.gz`.                                                                                                                                                                                                        |
 | `spring_1` | Full path to spring-compressed, gzipped FastQ file for read 1 or for reads 1 and 2. The Fastq file has to be first gzipped, then spring-compressed, and it must have the extension `.fastq.gz.spring` or `.fq.gz.spring`.                                                                                                         |
@@ -98,6 +103,24 @@ Output from Variant Calling and/or Annotation will be in a specific directory fo
 | `vcf`      | Full path to vcf file                                                                                                                                                                                                                                                                                                             |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+
+### RNA-seq mode
+
+Run RNA-seq quantification and differential abundance with `--mode rnaseq`. The mode uses STAR alignment and Salmon quantification, then runs the DESeq2 and g:Profiler2 workflow equivalent to the nf-core/differentialabundance `rnaseq_deseq2_gprofiler2` subworkflow. g:Profiler2 uses the fixed `hsapiens` organism.
+
+```bash
+nextflow run . \
+    -profile docker \
+    --mode rnaseq \
+    --input samplesheet.csv \
+    --outdir results \
+    --rnaseq_fasta genome.fa \
+    --rnaseq_gtf genes.gtf \
+    --rnaseq_transcript_fasta transcripts.fa \
+    --rnaseq_contrasts contrasts.csv
+```
+
+The contrast sheet must contain `variable`, `reference`, and `target` columns. `variable` must name a column in the RNA samplesheet, for example `status`.
 
 ### Start with mapping (`--step mapping` [default])
 

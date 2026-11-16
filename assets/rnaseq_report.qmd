@@ -1,0 +1,25 @@
+---
+title: RNA-seq differential abundance report
+format:
+    html:
+        toc: true
+        embed-resources: true
+params:
+    gprofiler2_organism: null
+---
+
+## Analysis
+
+Differential abundance was performed with DESeq2.
+
+## Functional enrichment
+
+g:Profiler2 organism: `r params$gprofiler2_organism`
+
+```{r}
+write.csv(
+    data.frame(tool = "r-base", version = R.version.string),
+    "versions.csv",
+    row.names = FALSE
+)
+```

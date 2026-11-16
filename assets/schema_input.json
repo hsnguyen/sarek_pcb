@@ -40,6 +40,26 @@
                 "errorMessage": "Lane identifier cannot contain spaces",
                 "meta": ["lane"]
             },
+            "assay": {
+                "type": "string",
+                "enum": ["dna", "rna"],
+                "default": "dna",
+                "errorMessage": "Assay must be either 'dna' or 'rna'.",
+                "meta": ["assay"]
+            },
+            "strandness": {
+                "type": "string",
+                "enum": ["auto", "forward", "reverse"],
+                "default": "auto",
+                "errorMessage": "RNA strandness must be 'auto', 'forward', or 'reverse'.",
+                "meta": ["strandness"]
+            },
+            "seq_platform": {
+                "type": "string",
+                "default": "ILLUMINA",
+                "errorMessage": "Sequencing platform must be a string.",
+                "meta": ["seq_platform"]
+            },
             "fastq_1": {
                 "type": "string",
                 "format": "file-path",

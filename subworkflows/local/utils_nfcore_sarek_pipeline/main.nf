@@ -15,6 +15,7 @@ include { completionSummary } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE } from '../../nf-core/utils_nextflow_pipeline'
 include { SAMPLESHEET_TO_CHANNEL } from '../samplesheet_to_channel'
+include { SAMPLESHEET_TO_RNASEQ_CHANNEL } from '../samplesheet_to_rnaseq_channel'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,7 +151,9 @@ workflow PIPELINE_INITIALISATION {
             : channel.fromList(samplesheetToList(params.input_restart, "${projectDir}/assets/schema_input.json"))
 
     SAMPLESHEET_TO_CHANNEL(
-        ch_from_samplesheet,
+        ch_from_samplesheet.filter { meta, _fastq_1, _fastq_2, _spring_1, _spring_2, _table, _cram, _crai, _bam, _bai, _contamination, _vcf, _variantcaller ->
+            (meta.assay ?: 'dna') == 'dna'
+        },
         params.aligner,
         params.ascat_alleles,
         params.ascat_loci,
@@ -187,8 +190,21 @@ workflow PIPELINE_INITIALISATION {
         params.mode,
     )
 
+    if (params.mode == 'rnaseq') {
+        SAMPLESHEET_TO_RNASEQ_CHANNEL(
+            ch_from_samplesheet.filter { meta, _fastq_1, _fastq_2, _spring_1, _spring_2, _table, _cram, _crai, _bam, _bai, _contamination, _vcf, _variantcaller ->
+                (meta.assay ?: 'dna') == 'rna'
+            },
+        )
+        ch_rnaseq_samplesheet = SAMPLESHEET_TO_RNASEQ_CHANNEL.out
+    }
+    else {
+        ch_rnaseq_samplesheet = channel.empty()
+    }
+
     emit:
     samplesheet = SAMPLESHEET_TO_CHANNEL.out.input_sample
+    rnaseq_samplesheet = ch_rnaseq_samplesheet
 }
 
 /*

@@ -70,6 +70,7 @@ params.vep_species = getGenomeAttribute('vep_species')
 include { SAREK } from './workflows/sarek'
 include { PANELS_CREATION } from './workflows/panels_creation'
 include { PURITY } from './workflows/purity'
+include { RNASEQ } from './workflows/rnaseq'
 include { PIPELINE_COMPLETION } from './subworkflows/local/utils_nfcore_sarek_pipeline'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sarek_pipeline'
 include { PREPARE_GENOME } from './subworkflows/local/prepare_genome'
@@ -90,8 +91,13 @@ include { samplesheetToList } from 'plugin/nf-schema'
 workflow NFCORE_PCBOMICS {
     take:
     samplesheet
+    rnaseq_samplesheet
 
     main:
+    if (params.mode == 'rnaseq') {
+        RNASEQ(rnaseq_samplesheet)
+    }
+    else {
     // build indexes if needed
     PREPARE_GENOME(
         params.ascat_alleles,
@@ -468,10 +474,11 @@ workflow NFCORE_PCBOMICS {
     else {
         error("Mode ${params.mode} is not recognized or supported.")
     }
+    }
 
     emit:
-    multiqc_publish = params.mode == 'sarek' ? SAREK.out.multiqc_publish : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_publish : PURITY.out.multiqc_publish
-    multiqc_report = params.mode == 'sarek' ? SAREK.out.multiqc_report : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_report : PURITY.out.multiqc_report
+    multiqc_publish = params.mode == 'rnaseq' ? RNASEQ.out.multiqc_publish : params.mode == 'sarek' ? SAREK.out.multiqc_publish : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_publish : PURITY.out.multiqc_publish
+    multiqc_report = params.mode == 'rnaseq' ? RNASEQ.out.multiqc_report : params.mode == 'sarek' ? SAREK.out.multiqc_report : params.mode == 'panels' ? PANELS_CREATION.out.multiqc_report : PURITY.out.multiqc_report
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -499,7 +506,10 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_PCBOMICS(PIPELINE_INITIALISATION.out.samplesheet)
+    NFCORE_PCBOMICS(
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.rnaseq_samplesheet,
+    )
 
     //
     // SUBWORKFLOW: Run completion tasks

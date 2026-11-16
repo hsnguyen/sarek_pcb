@@ -10,6 +10,11 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
+                    "atlasgeneannotationmanipulation/gtf2featureannotation": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "bbmap/bbsplit": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
@@ -140,9 +145,24 @@
                         "git_sha": "8f6fc518531291208e7a665f6e8bcbeb1f05f49e",
                         "installed_by": ["modules"]
                     },
+                    "custom/tabulartogseacls": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "custom/tabulartogseagct": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "deepvariant/rundeepvariant": {
                         "branch": "master",
                         "git_sha": "29031bf70ae8117b235400aca32796a433c733f2",
+                        "installed_by": ["modules"]
+                    },
+                    "deseq2/differential": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
                         "installed_by": ["modules"]
                     },
                     "dragmap/align": {
@@ -345,6 +365,11 @@
                         "git_sha": "268dd690f53fd7f7bb524648ef1144a9b4e963eb",
                         "installed_by": ["modules"]
                     },
+                    "gprofiler2/gost": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "gunzip": {
                         "branch": "master",
                         "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",
@@ -445,9 +470,29 @@
                         "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
                         "installed_by": ["modules"]
                     },
+                    "quarto/notebook": {
+                        "branch": "master",
+                        "git_sha": "3689538423807d90a454c87b24a55f6df17f1f9b",
+                        "installed_by": ["modules"]
+                    },
                     "rbt/vcfsplit": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
+                    "rmarkdownnotebook": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "salmon/index": {
+                        "branch": "master",
+                        "git_sha": "bcf5ac44e897d3a0055d9b37985cc21ea60ae8ab",
+                        "installed_by": ["modules"]
+                    },
+                    "salmon/quant": {
+                        "branch": "master",
+                        "git_sha": "bcf5ac44e897d3a0055d9b37985cc21ea60ae8ab",
                         "installed_by": ["modules"]
                     },
                     "samtools/bam2fq": {
@@ -540,6 +585,26 @@
                         "git_sha": "8ee2033cd73a14f4496e690196dac45426e9cadc",
                         "installed_by": ["modules"]
                     },
+                    "shinyngs/app": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "shinyngs/staticdifferential": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "shinyngs/staticexploratory": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "shinyngs/validatefomcomponents": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
                     "snpeff/download": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
@@ -563,6 +628,16 @@
                     "spring/decompress": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
+                    "star/align": {
+                        "branch": "master",
+                        "git_sha": "2ea7b517421e97210c41585f2347ad113e643a12",
+                        "installed_by": ["modules"]
+                    },
+                    "star/genomegenerate": {
+                        "branch": "master",
+                        "git_sha": "d59feee750b190a65b99d945e91a58ac0931fda1",
                         "installed_by": ["modules"]
                     },
                     "strelka/germline": {
@@ -628,6 +703,11 @@
                     "yte": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
+                    "zip": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
                         "installed_by": ["modules"]
                     }
                 }

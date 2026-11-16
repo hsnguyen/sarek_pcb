@@ -17,8 +17,8 @@
                     "type": "string",
                     "default": "sarek",
                     "description": "Workflow to run.",
-                    "help_text": "Use `sarek` for variant analysis, `panels` to create panels of normals, or `purity` for PureCN purity and ploidy estimation.",
-                    "enum": ["sarek", "panels", "purity"]
+                    "help_text": "Use `sarek` for variant analysis, `panels` to create panels of normals, `purity` for PureCN purity and ploidy estimation, or `rnaseq` for RNA-seq quantification and differential abundance.",
+                    "enum": ["sarek", "panels", "purity", "rnaseq"]
                 },
                 "input": {
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
@@ -60,6 +60,43 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "rnaseq_fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Reference genome FASTA for RNA-seq mode."
+                },
+                "rnaseq_gtf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Reference GTF annotation for RNA-seq mode."
+                },
+                "rnaseq_transcript_fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Transcript FASTA for Salmon quantification in RNA-seq mode."
+                },
+                "rnaseq_star_index": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true,
+                    "description": "Optional existing STAR index directory for RNA-seq mode."
+                },
+                "rnaseq_salmon_index": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true,
+                    "description": "Optional existing Salmon index directory for RNA-seq mode."
+                },
+                "rnaseq_contrasts": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.(csv|tsv|txt)$",
+                    "description": "Contrast sheet with variable, reference, target, and optional formula and comparison columns for RNA-seq differential abundance."
                 }
             }
         },

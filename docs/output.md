@@ -112,6 +112,18 @@ work/
 .nextflow.log
 ```
 
+## RNA-seq
+
+RNA-seq mode writes results to `rnaseq/`:
+
+- `rnaseq/fastqc/` contains FastQC reports.
+- `rnaseq/star/` contains STAR alignment logs, gene counts, and alignments.
+- `rnaseq/salmon/` contains Salmon quantification directories.
+- `rnaseq/differential_abundance/` contains DESeq2 results, normalised counts, dispersion plots, and model metadata.
+- `rnaseq/gprofiler2/` contains g:Profiler2 enrichment tables and plots.
+- `rnaseq/shinyngs/` contains the ShinyNGS application and exploratory and differential plots.
+- `rnaseq/report/` contains the Quarto HTML report and its parameters.
+
 ## Preprocessing
 
 Sarek pre-processes raw FastQ files or unmapped BAM files, based on [GATK best practices](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows).
