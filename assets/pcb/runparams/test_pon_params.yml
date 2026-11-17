@@ -1,0 +1,6 @@
+input: '${projectDir}}/assets/pcb/samplesheets/test_wes_samplesheet.csv'
+outdir: '/scratch/pawsey1152/snguyen/pdo/pon_434_test'
+genome: 'GATK.GRCh38'
+intervals: '${projectDir}}/assets/pcb/SureSelect_Human_All_Exon_HS_V8_hg38_Covered_Padded.bed'
+mode: 'panels'
+wes: true

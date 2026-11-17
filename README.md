@@ -1,17 +1,18 @@
 ## Introduction
-
+<img align="right" title="Sarek Workflow" src="docs/images/nf-core-sarek.png" width=30%>
 This is a workflow designed to work with genomics data at the [Perkins Cancer Biobank (PCB)](https://perkins.org.au/research/disease/cancer/cancer-biobank/). The pipeline is based on **nf-core/sarek**,  **nf-core/createpanelrefs**, as well as many other **nf-core** [subworkflows](https://nf-co.re/subworkflows) and [modules](https://nf-co.re/modules) to incorporate different analyses for Whole Exome Sequencing data analyses at PCB.
+
 **sarek_pcb** inherits almost everything from **nf-core/sarek** and integrated other relevant modules such as **Panels of Normal** construction, tumour purity estimation by **pureCN**, etc.
 
+<!--
 It also includes **nf-core/rnaseq** and **nf-core/differentialabundance** for RNASeq data analysis. Not all tools are needed for our own business though.
 (More coming in the future...)
 
-
-<img align="left" title="Sarek Workflow" src="docs/images/nf-core-sarek.png" width=20%>
 <p align="right">
     <img title="RNASeq Workflow" src="docs/images/nf-core-rnaseq.png" width=70%> 
     <img title="DEA Workflow" src="docs/images/nf-core-differentialabundance.png" width=70%>
 </p>
+-->
 
 ## Pipeline summary
 
@@ -50,14 +51,12 @@ For more details and further functionality, please refer to the [usage documenta
 Beside the default `sarek`, the pipeline provides options to run other workflows using the option `--mode`: 
 - [x] `--mode panels`: build panels of normal (PoN) for `GATK4 mutect2`, `cnvkit` and `pureCN`
 - [x] `--mode sarek`(default): run `sarek` pipeline for WES data
-- [x] `--mode purity`: run tumour purity estimation by `pureCN`
-- [ ] `--mode rnaseq`: run rnaseq analysis and reporting for RNASeq sequencing data
+- [x] `--mode purity`: run tumour purity estimation by `pureCN` or `cnvkit` (coming)
 
 A natural approach to use this pipeline should be:
 1. Create PoNs by normal data (normal-only samplesheet, e.g. PBMC, as input)
 2. Run sarek for WES data, provided the PoNs created above (tumour/normal samples involved as input).
 3. If needed, run `pureCN` for tumour purity estimation (tumour-only or same samplesheet to run `sarek`)
-4. (TODO) Run RNASeq analysis, e.g. DE analysis, enrichment analysis and generate user-friendly reports (using an independent RNASeq data samplesheet as input).
 
 ## Credits
 
